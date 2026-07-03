@@ -8,7 +8,7 @@ Client-facing demo apps and portfolio assets for a freelance CRM specialist
 | Path | What it is |
 |---|---|
 | [`crm-migration-studio/index.html`](crm-migration-studio/index.html) | **CRM Migration Studio** — an interactive, client-facing demo of a full CRM migration engagement. Single self-contained HTML file, no dependencies, no build step. |
-| [`hubspot-audit-demo/index.html`](hubspot-audit-demo/index.html) | **Audit Studio** — an interactive sample HubSpot portal audit: 8 scored areas, 33 checks, expandable findings with impact + fix, an impact/effort fix plan, and the engagement deliverables. HubSpot-only. Same single-file format. |
+| [`hubspot-audit-demo/index.html`](hubspot-audit-demo/index.html) | **Audit Studio** — an interactive sample HubSpot portal audit across **three selectable sample portals** (mid-market, agency, enterprise), each with its own full audit: 8 scored areas, ~30 findings with impact + fix, an impact/effort fix plan, fixed pricing tiers and an FAQ. HubSpot-only. Same single-file format. |
 | [`docs/PORTFOLIO_PLAYBOOK.md`](docs/PORTFOLIO_PLAYBOOK.md) | Project roadmap for both Upwork accounts, how to present the demo, and a complete Fiverr launch plan. |
 
 ## CRM Migration Studio
@@ -39,3 +39,30 @@ The file is fully self-contained (no CDNs, no fonts, no images), so it also
 works attached to an email or opened from a USB stick.
 
 > All data in the demo is synthetic. Nothing connects to a live system.
+
+## Audit Studio (HubSpot)
+
+A five-step interactive sample audit — HubSpot only. The prospect picks one of
+**three sample portals**, each a different real-world story with its own complete,
+hand-written audit:
+
+- **Acme Robotics** — the typical mid-market drift (health 59/100)
+- **Brightlane Media** — a fast-growing agency, marketing ahead of sales ops (69/100)
+- **Northwind SaaS** — enterprise sprawl, five years of nobody-turned-anything-off (44/100)
+
+Each audit runs the same process:
+
+1. **Portal** — pick the portal; see its size, tiers and the 8-area checklist
+2. **Scan** — animated read-only scan across the eight areas
+3. **Findings** — health-score ring, revenue-at-risk and quick-win stats, severity filters, category jump chips, expand-all, and ~30 findings each written as *symptom → why it costs money → the fix* (data quality, pipeline, automation, email/deliverability, sales adoption, reporting/attribution, integrations, governance)
+4. **Fix plan** — the findings ranked into a top-10 list with an impact-vs-effort matrix and a 30-day roadmap
+5. **Your audit** — process, deliverables, **fixed pricing tiers**, an FAQ accordion, read-only access reassurance, a booking CTA, and a downloadable per-portal sample report
+
+Also includes the **guided tour**, light/dark theme, mobile support, and an
+"audit a different portal" flow so a prospect can compare all three.
+
+Customize the same way — edit the `CONFIG` and `PRICING` blocks at the top of the
+`<script>` section. Host it exactly like the Migration Studio (drag
+`hubspot-audit-demo` onto Netlify Drop, or GitHub Pages / Vercel).
+
+> All portals and numbers are synthetic. Not affiliated with HubSpot, Inc.
