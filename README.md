@@ -8,6 +8,7 @@ Client-facing demo apps and portfolio assets for a freelance CRM specialist
 | Path | What it is |
 |---|---|
 | [`crm-migration-studio/index.html`](crm-migration-studio/index.html) | **CRM Migration Studio** — an interactive, client-facing demo of a full CRM migration engagement. Single self-contained HTML file, no dependencies, no build step. |
+| [`hubspot-audit-demo/index.html`](hubspot-audit-demo/index.html) | **Audit Studio** — an interactive sample HubSpot portal audit: 8 scored areas, 33 checks, expandable findings with impact + fix, an impact/effort fix plan, and the engagement deliverables. HubSpot-only. Same single-file format. |
 | [`docs/PORTFOLIO_PLAYBOOK.md`](docs/PORTFOLIO_PLAYBOOK.md) | Project roadmap for both Upwork accounts, how to present the demo, and a complete Fiverr launch plan. |
 
 ## CRM Migration Studio
