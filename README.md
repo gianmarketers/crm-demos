@@ -1,12 +1,14 @@
 # CRM Portfolio Projects
 
-Client-facing demo apps and portfolio assets for a freelance CRM specialist
-(HubSpot · GoHighLevel · Zoho CRM).
+Client-facing demo apps and portfolio assets for a freelance HubSpot / CRM specialist.
+
+**🌐 Live site:** https://gianmarketers.github.io/crm-demos/
 
 ## What's here
 
 | Path | What it is |
 |---|---|
+| [`index.html`](index.html) | **Portfolio Hub** — the landing page served at the live URL above. Hero with an animated portal-health card, service areas, a live-demos section linking to both demos below, representative results, process and a contact CTA. |
 | [`crm-migration-studio/index.html`](crm-migration-studio/index.html) | **CRM Migration Studio** — an interactive, client-facing demo of a full CRM migration engagement. Single self-contained HTML file, no dependencies, no build step. |
 | [`hubspot-audit-demo/index.html`](hubspot-audit-demo/index.html) | **Audit Studio** — an interactive sample HubSpot portal audit across **three selectable sample portals** (mid-market, agency, enterprise), each with its own full audit: 8 scored areas, ~30 findings with impact + fix, an impact/effort fix plan, fixed pricing tiers and an FAQ. HubSpot-only. Same single-file format. |
 | [`docs/PORTFOLIO_PLAYBOOK.md`](docs/PORTFOLIO_PLAYBOOK.md) | Project roadmap for both Upwork accounts, how to present the demo, and a complete Fiverr launch plan. |
