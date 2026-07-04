@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoHighLevel Client Demos — by niche</title>
+<meta name="description" content="Interactive GoHighLevel sub-account demos across niches: med spa, home services, real estate, dental, fitness and law. Click through any of them.">
+<style>
+  :root{
+    --bg:#f6f6f3; --surface:#ffffff; --surface-2:#f0f0ec;
+    --ink:#14161f; --ink-2:#54586a; --muted:#8b8f9f;
+    --line:#e6e6df; --hairline:rgba(20,22,31,.08);
+    --nav:#111524; --nav-2:#1a2036;
+    --accent:#3d63f0; --accent-deep:#2846c4; --accent-soft:#e4e9fe; --on-accent:#fff;
+    --good:#12b76a;
+    --shadow:0 1px 2px rgba(16,18,28,.05), 0 8px 22px rgba(16,18,28,.06);
+    --shadow-lg:0 16px 40px rgba(16,18,28,.14);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.55;}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+  a{color:inherit;text-decoration:none;}
+  h1,h2,h3{line-height:1.12;font-weight:700;letter-spacing:-.02em;text-wrap:balance;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;}
+
+  /* dark hero (contrast against the light gallery) */
+  .hero{background:radial-gradient(130% 120% at 90% 0%, #26305c 0%, #161b32 48%, #10142a 100%);color:#fff;padding:64px 0 88px;position:relative;overflow:hidden;}
+  .hero .glow{position:absolute;width:420px;height:420px;border-radius:50%;background:#3d63f0;filter:blur(80px);opacity:.4;top:-160px;right:80px;}
+  .hero .eyebrow{color:#9db4ff;margin-bottom:16px;}
+  .hero .badge{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);padding:6px 13px;border-radius:99px;margin-bottom:20px;}
+  .hero .badge .d{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);}
+  .hero h1{font-size:clamp(30px,5vw,50px);max-width:760px;margin-bottom:18px;}
+  .hero h1 .hl{background:linear-gradient(90deg,#8aa2ff,#c6b0ff);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero p{font-size:clamp(16px,2vw,19px);color:#c3c9e0;max-width:600px;}
+  .hero .by{margin-top:22px;display:flex;align-items:center;gap:12px;}
+  .hero .by .ava{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent-deep));display:grid;place-items:center;font-weight:800;font-size:18px;}
+  .hero .by b{font-size:15px;display:block;} .hero .by span{font-size:13px;color:#9aa2c4;}
+
+  .gallery{padding:0 0 72px;margin-top:-48px;position:relative;z-index:2;}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:600px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s;display:flex;flex-direction:column;}
+  .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);}
+  .thumb{aspect-ratio:16/10;overflow:hidden;border-bottom:1px solid var(--hairline);background:#10142a;position:relative;}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .tag{position:absolute;top:12px;left:12px;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;background:rgba(17,21,36,.72);backdrop-filter:blur(4px);padding:5px 11px;border-radius:99px;border:1px solid rgba(255,255,255,.14);}
+  .body{padding:18px 20px 20px;display:flex;flex-direction:column;flex:1;}
+  .body h3{font-size:18px;margin-bottom:6px;}
+  .body p{font-size:13.5px;color:var(--ink-2);margin-bottom:16px;flex:1;}
+  .open{display:inline-flex;align-items:center;gap:8px;font-weight:650;font-size:14px;color:var(--accent-deep);}
+  .open svg{width:16px;height:16px;transition:transform .15s;}
+  .card:hover .open svg{transform:translateX(3px);}
+
+  .note{margin-top:40px;background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius);padding:22px 24px;display:flex;gap:16px;align-items:flex-start;box-shadow:var(--shadow);}
+  .note .ic{width:40px;height:40px;border-radius:11px;flex:none;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-deep);font-size:20px;}
+  .note h3{font-size:16px;margin-bottom:5px;}
+  .note p{font-size:13.5px;color:var(--ink-2);max-width:760px;}
+
+  footer{border-top:1px solid var(--line);padding:28px 0;}
+  .foot{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--muted);}
+  .foot b{color:var(--ink-2);font-weight:650;}
+  .foot .r{margin-left:auto;}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="glow"></div>
+    <p class="eyebrow">GoHighLevel · Client Demos</p>
+    <span class="badge"><span class="d"></span>6 live, interactive sub-accounts</span>
+    <h1>See exactly what your <span class="hl">GoHighLevel</span> account could look like — before you hire.</h1>
+    <p>Each demo below is a real, clickable GoHighLevel sub-account for a specific niche: dashboard, pipeline, unified inbox, automations, reputation and reporting. Pick the one closest to your business and click through it.</p>
+    <div class="by">
+      <span class="ava" id="ava">A</span>
+      <div><b id="agencyName">Your Agency</b><span>GoHighLevel setup, automation &amp; snapshots</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="gallery">
+  <div class="wrap">
+    <div class="grid" id="grid"></div>
+    <div class="note">
+      <span class="ic">🎛️</span>
+      <div>
+        <h3>Every demo is fully interactive — and re-brandable</h3>
+        <p>Click the left-hand menu in any demo to move between sections, or take the built-in guided tour. All data is synthetic. On a real engagement each of these becomes a snapshot branded to your business, loaded with your pipeline, your offers and your automations.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>Prepared by <b id="footName">Your Agency</b></span>
+    <span>· GoHighLevel client demos</span>
+    <span class="r">All demos use synthetic data · not affiliated with HighLevel, Inc.</span>
+  </div>
+</footer>
+
+<script>
+"use strict";
+/* ===== EDIT ME ===== */
+const CONFIG = { agencyName: "Your Agency" };
+
+const NICHES = [
+  {tag:"Med Spa", name:"Radiance Aesthetics", dir:"gohighlevel-demo",
+   desc:"Aesthetics clinic — Botox & filler pipeline, missed-call text-back, membership reactivation."},
+  {tag:"Home Services", name:"Summit Home Services", dir:"gohighlevel-home-services",
+   desc:"HVAC / plumbing / electrical — jobs pipeline, quote follow-up, seasonal maintenance, LSA leads."},
+  {tag:"Real Estate", name:"Coastline Realty", dir:"gohighlevel-real-estate",
+   desc:"Buyer & seller pipeline to closed, GCI reporting, speed-to-lead and long-term nurture."},
+  {tag:"Dental / Ortho", name:"Bright Smile Dental", dir:"gohighlevel-dental",
+   desc:"New-patient pipeline, production & case acceptance, recall/reactivation, treatment follow-up."},
+  {tag:"Fitness / Gym", name:"Iron Pulse Fitness", dir:"gohighlevel-fitness",
+   desc:"Membership pipeline, MRR & active members, free-trial→member and win-back automations."},
+  {tag:"Law Firm", name:"Hensley Law Group", dir:"gohighlevel-law-firm",
+   desc:"Personal-injury intake pipeline, speed-to-lead, no-show recovery, post-settlement referrals."}
+];
+
+const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+document.getElementById("grid").innerHTML = NICHES.map(n=>`
+  <a class="card" href="../${n.dir}/" target="_blank" rel="noopener">
+    <div class="thumb"><span class="tag">${n.tag}</span><img loading="lazy" src="../${n.dir}/cover.png" alt="${n.name} — GoHighLevel demo cover"></div>
+    <div class="body">
+      <h3>${n.name}</h3>
+      <p>${n.desc}</p>
+      <span class="open">Open live demo ${arrow}</span>
+    </div>
+  </a>`).join("");
+
+(function(){
+  const a = CONFIG.agencyName;
+  document.getElementById("agencyName").textContent = a;
+  document.getElementById("footName").textContent = a;
+  document.getElementById("ava").textContent = (a.trim()[0]||"A").toUpperCase();
+})();
+</script>
+</body>
+</html>
