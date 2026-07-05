@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HubSpot Demos — Audit Studio & CRM Migration Studio</title>
+<meta name="description" content="Interactive HubSpot demos: a full portal audit and a CRM migration walkthrough, on realistic sample data.">
+<style>
+  :root{--bg:#0b1220;--card:#111a2e;--ink:#eef2fb;--mut:#9fb0cf;--accent:#ff7a59;--accent2:#ffab91;--line:rgba(255,255,255,.10)}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:radial-gradient(1200px 600px at 70% -10%,rgba(255,122,89,.18),transparent),var(--bg);color:var(--ink);line-height:1.55}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 22px}
+  header{padding:64px 0 8px}
+  .eyebrow{color:var(--accent);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:.82rem}
+  h1{font-size:clamp(2rem,5vw,3.1rem);line-height:1.08;margin:.35em 0 .3em;letter-spacing:-.02em}
+  h1 .hl{color:var(--accent)}
+  .lede{color:var(--mut);font-size:1.12rem;max-width:60ch}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:38px 0 20px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;transition:transform .15s ease,border-color .15s ease}
+  .card:hover{transform:translateY(-4px);border-color:rgba(255,122,89,.55)}
+  .thumb{padding:26px;background:linear-gradient(135deg,rgba(255,122,89,.16),rgba(255,171,145,.06));display:flex;align-items:center;justify-content:center;min-height:150px}
+  .thumb .num{font-size:3.2rem;font-weight:800;color:var(--accent)}
+  .thumb .lab{font-weight:700;color:var(--accent2);font-size:1.3rem}
+  .tag{display:inline-block;background:rgba(255,122,89,.15);color:var(--accent2);border:1px solid rgba(255,122,89,.3);padding:3px 10px;border-radius:999px;font-size:.74rem;font-weight:700;margin-bottom:8px;width:max-content}
+  .body{padding:20px 22px 24px}
+  .body h3{margin:.1em 0 .35em;font-size:1.28rem}
+  .body p{color:var(--mut);margin:0 0 14px;font-size:.98rem}
+  .open{color:var(--accent);font-weight:700}
+  footer{color:var(--mut);font-size:.85rem;padding:26px 0 60px;border-top:1px solid var(--line);margin-top:26px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <span class="eyebrow">Freelance HubSpot Specialist</span>
+  <h1>See exactly how I run a <span class="hl">HubSpot</span> engagement — before you hire.</h1>
+  <p class="lede">Two live, interactive demos on realistic sample data — click through a full portal audit and a complete CRM migration in about two minutes each.</p>
+</div></header>
+<main class="wrap">
+  <div class="grid">
+    <a class="card" href="../hubspot-audit-demo/" target="_blank" rel="noopener">
+      <div class="thumb"><span class="num">59</span></div>
+      <div class="body">
+        <span class="tag">HubSpot audit</span>
+        <h3>Audit Studio</h3>
+        <p>Pick one of three sample portals and walk a full audit: 8 scored areas, ~30 findings with impact and fix, an impact/effort plan, pricing tiers and FAQ.</p>
+        <span class="open">Open live demo →</span>
+      </div>
+    </a>
+    <a class="card" href="../crm-migration-studio/" target="_blank" rel="noopener">
+      <div class="thumb"><span class="lab">Migrate →</span></div>
+      <div class="body">
+        <span class="tag">CRM migration</span>
+        <h3>CRM Migration Studio</h3>
+        <p>A six-step migration walkthrough — scope, connect, field mapping, data-quality dry run, batched run and a KPI report. Migrate any source into HubSpot.</p>
+        <span class="open">Open live demo →</span>
+      </div>
+    </a>
+  </div>
+</main>
+<footer><div class="wrap">All portals and numbers are synthetic. Not affiliated with HubSpot, Inc.</div></footer>
+</body>
+</html>
