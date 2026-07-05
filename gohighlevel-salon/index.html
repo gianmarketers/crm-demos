@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoHighLevel Client Demo — Velvet & Fade</title>
+<meta name="description" content="Interactive GoHighLevel sub-account demo for a salon & barbershop: dashboard, pipeline, conversations, calendar, automation, reputation and reporting.">
+<style>
+  :root{
+    --nav:#12172a; --nav-2:#1b2340; --nav-ink:#c7cce0; --nav-ink-2:#8b93b5;
+    --nav-active:#3d63f0; --nav-hover:#232c4d;
+    --bg:#f4f5f9; --surface:#ffffff; --surface-2:#f7f8fb; --surface-3:#eef0f6;
+    --ink:#141726; --ink-2:#5b6178; --muted:#9096ac;
+    --line:#e6e8f0; --hairline:rgba(20,23,38,.08);
+    --brand:#c026d3; --brand-2:#86198f; --brand-soft:#fbe8fd;
+    --accent:#3d63f0; --accent-deep:#2846c4; --accent-soft:#e3e9fe;
+    --good:#12b76a; --good-bg:#e7f8f0; --warn:#f79009; --warn-bg:#fef3e2; --danger:#f04438; --danger-bg:#fde8e6;
+    --star:#f5a623;
+    --shadow:0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.07);
+    --shadow-lg:0 12px 32px rgba(16,24,40,.14), 0 4px 10px rgba(16,24,40,.08);
+    --radius:12px;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c0f1a; --surface:#141827; --surface-2:#1a1f31; --surface-3:#222840;
+    --ink:#eef0f7; --ink-2:#a6adc6; --muted:#79809a;
+    --line:#252b40; --hairline:rgba(255,255,255,.08);
+    --accent:#5c7cf5; --accent-deep:#8aa2f8; --accent-soft:#20294a;
+    --good:#3ddc97; --good-bg:#12321f; --warn:#f9b24b; --warn-bg:#3a2a12; --danger:#ff6b60; --danger-bg:#3a1c1a;
+    --brand-soft:#2b1030;
+    --shadow:0 1px 2px rgba(0,0,0,.4); --shadow-lg:0 16px 44px rgba(0,0,0,.55);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased;}
+  @media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important;} }
+  button{font:inherit; color:inherit; background:none; border:none; cursor:pointer;}
+  h1,h2,h3,h4{line-height:1.2; font-weight:660; letter-spacing:-.01em;}
+  svg{display:block;}
+  ::-webkit-scrollbar{width:9px; height:9px;} ::-webkit-scrollbar-thumb{background:var(--line); border-radius:99px;}
+
+  .app{display:grid; grid-template-columns:236px 1fr; min-height:100vh;}
+  .scrim{position:fixed; inset:0; display:none; background:rgba(8,10,20,.5); z-index:110;}
+  /* ---------- Sidebar ---------- */
+  .side{background:var(--nav); color:var(--nav-ink); display:flex; flex-direction:column; position:sticky; top:0; height:100vh;}
+  .acct{display:flex; align-items:center; gap:11px; padding:16px 16px 14px; border-bottom:1px solid rgba(255,255,255,.07);}
+  .acct-logo{width:38px; height:38px; border-radius:10px; flex:none; display:grid; place-items:center; font-weight:800; color:#fff; background:linear-gradient(135deg,var(--brand),var(--brand-2)); font-size:16px;}
+  .acct-name{font-weight:680; color:#fff; font-size:14.5px; line-height:1.15;}
+  .acct-sub{font-size:11.5px; color:var(--nav-ink-2);}
+  .acct-switch{margin-left:auto; color:var(--nav-ink-2);}
+  .side-scroll{flex:1; overflow-y:auto; padding:10px 10px 4px;}
+  .nav-item{display:flex; align-items:center; gap:12px; width:100%; padding:9px 12px; border-radius:9px; color:var(--nav-ink); font-size:13.5px; font-weight:540; margin-bottom:2px; text-align:left; position:relative;}
+  .nav-item:hover{background:var(--nav-hover); color:#fff;}
+  .nav-item.on{background:var(--accent); color:#fff;}
+  .nav-item.on .badge{background:rgba(255,255,255,.22); color:#fff;}
+  .nav-item svg{width:18px; height:18px; flex:none; stroke-width:1.9;}
+  .nav-item .badge{margin-left:auto; font-size:11px; font-weight:700; background:var(--danger); color:#fff; padding:1px 7px; border-radius:99px;}
+  .nav-sec{font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--nav-ink-2); padding:14px 12px 6px;}
+  .side-foot{padding:12px; border-top:1px solid rgba(255,255,255,.07); display:flex; align-items:center; gap:10px;}
+  .side-foot .ava{width:32px; height:32px; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; font-weight:700; font-size:12px; flex:none;}
+  .side-foot .u b{font-size:12.5px; color:#fff; display:block; line-height:1.2;}
+  .side-foot .u span{font-size:11px; color:var(--nav-ink-2);}
+
+  /* ---------- Main ---------- */
+  .main{display:flex; flex-direction:column; min-width:0;}
+  .topbar{display:flex; align-items:center; gap:14px; padding:13px 24px; background:var(--surface); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:20;}
+  .page-title{font-size:18px; font-weight:680;}
+  .page-sub{font-size:12.5px; color:var(--muted);}
+  .search{margin-left:auto; display:flex; align-items:center; gap:8px; background:var(--surface-2); border:1px solid var(--line); border-radius:9px; padding:8px 12px; width:240px; color:var(--muted); font-size:13px;}
+  .search svg{width:15px; height:15px; flex:none;}
+  .tb-btn{width:38px; height:38px; border-radius:9px; border:1px solid var(--line); background:var(--surface); display:grid; place-items:center; position:relative;}
+  .tb-btn:hover{background:var(--surface-2);}
+  .tb-btn svg{width:17px; height:17px; stroke:var(--ink-2);}
+  .tb-btn .dot{position:absolute; top:8px; right:9px; width:7px; height:7px; border-radius:50%; background:var(--danger); border:2px solid var(--surface);}
+  .demochip{font-size:11px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; color:var(--accent); background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 30%,transparent); padding:3px 9px; border-radius:99px;}
+
+  .content{padding:24px; overflow-x:hidden;}
+  .view{display:none; animation:fade .25s ease;} .view.on{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+
+  .card{background:var(--surface); border:1px solid var(--hairline); border-radius:var(--radius); box-shadow:var(--shadow);}
+  .card-pad{padding:18px;}
+  .card-h{display:flex; align-items:center; gap:10px; padding:15px 18px; border-bottom:1px solid var(--line);}
+  .card-h h3{font-size:14.5px;} .card-h .sub{font-size:12px; color:var(--muted);}
+  .card-h .link{margin-left:auto; font-size:12.5px; font-weight:600; color:var(--accent);}
+  .btn{display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:8px; font-weight:600; font-size:13px; border:1px solid transparent;}
+  .btn-primary{background:var(--accent); color:#fff;} .btn-primary:hover{background:var(--accent-deep);}
+  .btn-ghost{border-color:var(--line); background:var(--surface); color:var(--ink);} .btn-ghost:hover{background:var(--surface-2);}
+  .btn svg{width:15px; height:15px;}
+
+  /* KPI tiles */
+  .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:16px;}
+  @media(max-width:1000px){ .kpis{grid-template-columns:repeat(2,1fr);} }
+  .kpi{padding:16px 18px;} .kpi .kt{display:flex; align-items:center; gap:9px; margin-bottom:10px;}
+  .kpi .ki{width:34px; height:34px; border-radius:9px; display:grid; place-items:center;}
+  .kpi .ki svg{width:17px; height:17px;}
+  .kpi .kl{font-size:12.5px; color:var(--ink-2); font-weight:560;}
+  .kpi .kv{font-size:26px; font-weight:720; letter-spacing:-.02em;}
+  .kpi .kd{font-size:12px; font-weight:640; margin-top:3px; display:inline-flex; gap:4px; align-items:center;}
+  .kd.up{color:var(--good);} .kd.down{color:var(--danger);}
+  .ib{background:var(--accent-soft); color:var(--accent);} .ig{background:var(--good-bg); color:var(--good);}
+  .iw{background:var(--warn-bg); color:var(--warn);} .ip{background:var(--brand-soft); color:var(--brand-2);}
+
+  .grid2{display:grid; grid-template-columns:1.5fr 1fr; gap:16px;} @media(max-width:980px){ .grid2{grid-template-columns:1fr;} }
+  .grid2b{display:grid; grid-template-columns:1fr 1fr; gap:16px;} @media(max-width:980px){ .grid2b{grid-template-columns:1fr;} }
+
+  /* bar chart */
+  .bars{display:flex; align-items:flex-end; gap:12px; height:180px; padding:8px 4px 0;}
+  .bar-col{flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; height:100%; justify-content:flex-end;}
+  .bar{width:60%; max-width:34px; border-radius:6px 6px 0 0; background:var(--accent); transition:height .8s cubic-bezier(.4,0,.2,1); position:relative;}
+  .bar.alt{background:var(--brand);} .bar-lbl{font-size:11px; color:var(--muted);} .bar-val{font-size:11px; font-weight:700; color:var(--ink-2);}
+  .legend{display:flex; gap:16px; font-size:12px; color:var(--ink-2); padding:0 4px 4px;}
+  .legend i{width:10px; height:10px; border-radius:3px; display:inline-block; margin-right:6px; vertical-align:middle;}
+
+  /* activity feed */
+  .feed{display:grid;} .feed-row{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line);}
+  .feed-row:last-child{border-bottom:none;}
+  .feed-ic{width:30px; height:30px; border-radius:8px; flex:none; display:grid; place-items:center;} .feed-ic svg{width:15px; height:15px;}
+  .feed b{font-weight:640;} .feed .ft{font-size:13px; color:var(--ink-2);} .feed .fm{font-size:11.5px; color:var(--muted); margin-top:1px;}
+
+  /* pipeline kanban */
+  .pipe{display:grid; grid-auto-flow:column; grid-auto-columns:264px; gap:14px; overflow-x:auto; padding-bottom:8px;}
+  .col{background:var(--surface-2); border:1px solid var(--line); border-radius:12px; display:flex; flex-direction:column; max-height:640px;}
+  .col-h{display:flex; align-items:center; gap:8px; padding:12px 14px; border-bottom:1px solid var(--line);}
+  .col-h .cn{font-size:13px; font-weight:680;} .col-h .cc{font-size:11px; font-weight:700; color:var(--muted); background:var(--surface-3); padding:1px 8px; border-radius:99px;}
+  .col-h .cv{margin-left:auto; font-size:12px; font-weight:700; color:var(--good);}
+  .col-body{padding:10px; display:grid; gap:9px; overflow-y:auto;}
+  .op{background:var(--surface); border:1px solid var(--hairline); border-radius:10px; padding:11px 12px; box-shadow:var(--shadow); cursor:grab;}
+  .op:hover{border-color:var(--accent);}
+  .op .on{font-weight:640; font-size:13px;} .op .os{font-size:12px; color:var(--ink-2); margin:2px 0 8px;}
+  .op-foot{display:flex; align-items:center; gap:8px;}
+  .op-val{font-size:12.5px; font-weight:720; color:var(--ink);}
+  .op-ava{width:22px; height:22px; border-radius:50%; margin-left:auto; display:grid; place-items:center; font-size:10px; font-weight:700; color:#fff;}
+  .tag{font-size:10.5px; font-weight:640; padding:2px 7px; border-radius:6px;}
+  .col-band{height:3px; border-radius:99px 99px 0 0;}
+
+  /* conversations */
+  .conv{display:grid; grid-template-columns:300px 1fr; height:600px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--surface);}
+  @media(max-width:820px){ .conv{grid-template-columns:1fr; height:auto;} .conv .thread{display:none;} }
+  .conv-list{border-right:1px solid var(--line); overflow-y:auto;}
+  .conv-item{display:flex; gap:11px; padding:13px 14px; border-bottom:1px solid var(--line); cursor:pointer; position:relative;}
+  .conv-item:hover{background:var(--surface-2);} .conv-item.on{background:var(--accent-soft);}
+  .conv-item.on::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent);}
+  .conv-ava{width:38px; height:38px; border-radius:50%; flex:none; display:grid; place-items:center; font-weight:700; color:#fff; font-size:13px;}
+  .conv-meta{min-width:0; flex:1;} .conv-meta .cn{font-weight:640; font-size:13px; display:flex; align-items:center; gap:6px;}
+  .conv-meta .cp{font-size:12px; color:var(--ink-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .conv-time{font-size:11px; color:var(--muted); flex:none;}
+  .ch-ic{width:15px; height:15px;} .un{width:8px; height:8px; border-radius:50%; background:var(--accent); flex:none;}
+  .thread{display:flex; flex-direction:column;}
+  .thread-h{display:flex; align-items:center; gap:11px; padding:14px 18px; border-bottom:1px solid var(--line);}
+  .thread-body{flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:12px; background:var(--surface-2);}
+  .msg{max-width:74%; padding:10px 13px; border-radius:13px; font-size:13px; line-height:1.45;}
+  .msg .mt{font-size:10.5px; color:var(--muted); margin-top:5px;}
+  .msg.in{align-self:flex-start; background:var(--surface); border:1px solid var(--line); border-bottom-left-radius:4px;}
+  .msg.out{align-self:flex-end; background:var(--accent); color:#fff; border-bottom-right-radius:4px;} .msg.out .mt{color:rgba(255,255,255,.75);}
+  .msg.note{align-self:center; background:var(--warn-bg); color:var(--ink-2); font-size:11.5px; border-radius:8px; max-width:90%;}
+  .thread-input{display:flex; align-items:center; gap:10px; padding:12px 16px; border-top:1px solid var(--line);}
+  .thread-input .fake{flex:1; background:var(--surface-2); border:1px solid var(--line); border-radius:9px; padding:10px 12px; color:var(--muted); font-size:13px;}
+  .chan-tabs{display:flex; gap:6px;} .chan-tab{font-size:11px; font-weight:600; padding:3px 9px; border-radius:7px; background:var(--surface-2); color:var(--ink-2); border:1px solid var(--line);}
+  .chan-tab.on{background:var(--accent); color:#fff; border-color:transparent;}
+
+  /* calendar */
+  .cal{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
+  .cal .dow{font-size:11px; font-weight:700; color:var(--muted); text-align:center; padding:4px 0; text-transform:uppercase; letter-spacing:.04em;}
+  .cal .day{min-height:74px; border:1px solid var(--line); border-radius:9px; padding:6px; background:var(--surface); font-size:11px;}
+  .cal .day.out{background:var(--surface-2); color:var(--muted);}
+  .cal .dn{font-weight:640; color:var(--ink-2); margin-bottom:4px;} .cal .day.today .dn{color:#fff; background:var(--accent); width:20px; height:20px; border-radius:50%; display:grid; place-items:center;}
+  .appt{font-size:10px; font-weight:600; padding:2px 5px; border-radius:5px; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .appt.botox{background:var(--accent-soft); color:var(--accent);} .appt.facial{background:var(--brand-soft); color:var(--brand-2);} .appt.laser{background:var(--good-bg); color:var(--good);} .appt.consult{background:var(--warn-bg); color:var(--warn);}
+  .up-appt{display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--line);} .up-appt:last-child{border:none;}
+  .up-time{text-align:center; flex:none; width:58px;} .up-time b{font-size:14px; display:block;} .up-time span{font-size:10.5px; color:var(--muted);}
+  .up-bar{width:3px; align-self:stretch; border-radius:99px;}
+
+  /* workflow builder */
+  .wf-tabs{display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;}
+  .wf-tab{padding:8px 14px; border-radius:9px; font-size:13px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink-2);}
+  .wf-tab.on{background:var(--accent); color:#fff; border-color:transparent;}
+  .wf-tab .st{display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px; background:var(--good);}
+  .flow{max-width:420px; margin:0 auto; display:flex; flex-direction:column; align-items:center; padding:6px 0;}
+  .node{width:100%; background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:13px 15px; display:flex; gap:12px; align-items:center; box-shadow:var(--shadow);}
+  .node.trigger{border-color:var(--accent); background:var(--accent-soft);}
+  .node .nic{width:34px; height:34px; border-radius:9px; flex:none; display:grid; place-items:center;} .node .nic svg{width:17px; height:17px;}
+  .node .nn{font-weight:640; font-size:13.5px;} .node .nd{font-size:12px; color:var(--ink-2);}
+  .node.branch{background:transparent; border:none; box-shadow:none; padding:0; gap:10px;}
+  .branch-wrap{display:flex; gap:10px; width:100%;} .branch-wrap .node{flex:1;}
+  .connector{width:2px; height:20px; background:var(--line);}
+  .conn-lbl{font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; padding:3px 0;}
+  .wf-stats{display:flex; gap:22px; flex-wrap:wrap; margin-top:4px;} .wf-stat b{font-size:19px; font-weight:720;} .wf-stat span{font-size:11.5px; color:var(--muted); display:block;}
+
+  /* reputation */
+  .rep-hero{display:flex; gap:24px; align-items:center; flex-wrap:wrap;}
+  .rep-score{text-align:center; padding:6px 10px;} .rep-score .big{font-size:44px; font-weight:760; letter-spacing:-.02em; line-height:1;}
+  .stars{display:inline-flex; gap:2px; color:var(--star);} .stars svg{width:16px; height:16px;}
+  .rep-bars{flex:1; min-width:220px; display:grid; gap:6px;}
+  .rep-bar{display:grid; grid-template-columns:52px 1fr 34px; align-items:center; gap:10px; font-size:12px; color:var(--ink-2);}
+  .rep-track{height:8px; border-radius:99px; background:var(--surface-3); overflow:hidden;} .rep-fill{height:100%; background:var(--star); border-radius:99px;}
+  .review{padding:14px 0; border-bottom:1px solid var(--line); display:flex; gap:12px;} .review:last-child{border:none;}
+  .review .rv-ava{width:38px; height:38px; border-radius:50%; flex:none; display:grid; place-items:center; color:#fff; font-weight:700; font-size:13px;}
+  .review .rv-top{display:flex; align-items:center; gap:8px; margin-bottom:3px;} .review .rv-n{font-weight:640; font-size:13px;}
+  .review .src{margin-left:auto; font-size:11px; color:var(--muted);} .review p{font-size:12.5px; color:var(--ink-2);}
+  .review .rv-reply{margin-top:8px; font-size:11.5px; color:var(--ink-2); background:var(--surface-2); border-left:2px solid var(--accent); padding:8px 11px; border-radius:0 8px 8px 0;}
+
+  /* reporting */
+  .don-wrap{display:flex; align-items:center; gap:20px; flex-wrap:wrap;}
+  .donut{width:150px; height:150px; flex:none;}
+  .don-legend{display:grid; gap:8px; flex:1; min-width:180px;}
+  .dl-row{display:flex; align-items:center; gap:9px; font-size:12.5px;}
+  .dl-row .sw{width:11px; height:11px; border-radius:3px;} .dl-row .dv{margin-left:auto; font-weight:700; font-variant-numeric:tabular-nums;}
+  .funnel-rows{display:grid; gap:9px;}
+  .fn-row{display:grid; grid-template-columns:120px 1fr 46px; align-items:center; gap:10px; font-size:12.5px;}
+  .fn-track{height:24px; border-radius:7px; background:var(--surface-3); overflow:hidden; display:flex; align-items:center;}
+  .fn-fill{height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-deep)); border-radius:7px; display:flex; align-items:center; padding-left:10px; color:#fff; font-size:11.5px; font-weight:700; min-width:40px;}
+  .fn-val{font-weight:700; text-align:right; font-variant-numeric:tabular-nums;}
+
+  .banner{display:flex; align-items:center; gap:12px; background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 25%,transparent); color:var(--ink); border-radius:11px; padding:12px 16px; margin-bottom:18px; font-size:13px;}
+  .banner b{font-weight:680;} .banner .x{margin-left:auto; color:var(--muted); font-weight:700; padding:4px 8px;}
+
+  /* guided tour */
+  .tour-mask{position:fixed; z-index:200; border-radius:12px; pointer-events:none; box-shadow:0 0 0 9999px rgba(8,10,20,.62); transition:all .3s ease; border:2px solid var(--accent);}
+  .tour-card{position:fixed; z-index:201; width:min(340px,calc(100vw - 32px)); background:var(--surface); border:1px solid var(--hairline); border-radius:14px; box-shadow:var(--shadow-lg); padding:18px;}
+  .tour-card .tc{font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); margin-bottom:6px;}
+  .tour-card h4{font-size:15px; margin-bottom:6px;} .tour-card p{font-size:13px; color:var(--ink-2); margin-bottom:14px;}
+  .tour-nav{display:flex; gap:8px; align-items:center;} .tour-nav .btn{padding:7px 13px;}
+  .tour-close{margin-left:auto; color:var(--muted); font-size:13px; font-weight:600;} .tour-close:hover{color:var(--ink);}
+
+  .mobile-note{display:none;}
+  @media(max-width:720px){
+    .app{grid-template-columns:1fr;}
+    .side{position:fixed; left:0; top:0; bottom:0; width:236px; transform:translateX(-100%); transition:transform .25s; z-index:120;}
+    .side.open{transform:none;}
+    .scrim.on{display:block;}
+    .menu-btn{display:grid!important;}
+    .search{display:none;}
+  }
+  .menu-btn{display:none; width:38px; height:38px; border-radius:9px; border:1px solid var(--line); background:var(--surface); place-items:center;}
+  .menu-btn svg{width:18px; height:18px; stroke:var(--ink-2);}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="scrim" id="scrim"></div>
+  <aside class="side" id="side">
+    <div class="acct">
+      <span class="acct-logo" id="acctLogo">R</span>
+      <div>
+        <div class="acct-name" id="acctName">Velvet & Fade</div>
+        <div class="acct-sub" id="acctSub">Sub-account</div>
+      </div>
+      <span class="acct-switch"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m7 9 5-5 5 5M7 15l5 5 5-5"/></svg></span>
+    </div>
+    <div class="side-scroll" id="navList"></div>
+    <div class="side-foot">
+      <span class="ava" id="agencyAva">A</span>
+      <div class="u"><b id="agencyName">Your Agency</b><span>Agency admin</span></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <div>
+        <div class="page-title" id="pageTitle">Dashboard</div>
+        <div class="page-sub" id="pageSub">Welcome back — here's how Velvet & Fade is doing this month.</div>
+      </div>
+      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4" stroke-linecap="round"/></svg> Search contacts, convos…</div>
+      <span class="demochip">Interactive demo</span>
+      <button class="tb-btn" id="tourBtn" title="Guided tour" aria-label="Guided tour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9a3 3 0 0 1 5.6 1c0 2-3 2.5-3 4"/><circle cx="12" cy="17.4" r=".6" fill="currentColor"/></svg></button>
+      <button class="tb-btn" id="themeBtn" title="Theme" aria-label="Theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg></button>
+      <button class="tb-btn" id="notifBtn" title="Notifications" aria-label="Notifications"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   EDIT ME — brand this demo for your agency & the client
+   ============================================================ */
+const CONFIG = {
+  agencyName: "Your Agency",
+  clientName: "Velvet & Fade",
+  clientType: "Salon · Barbershop",
+  clientInitial: "V"
+};
+
+const $ = (s,r)=> (r||document).querySelector(s);
+const $$ = (s,r)=> Array.from((r||document).querySelectorAll(s));
+const money = n => "$"+n.toLocaleString("en-US");
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const avaColor = i => ["#3d63f0","#12b76a","#c98a6b","#8b5cf6","#f5a623","#ef6461","#0ea5e9","#e0679a"][i%8];
+
+/* ---------------- Nav ---------------- */
+const NAV = [
+  {sec:"Menu"},
+  {id:"dashboard", name:"Dashboard", icon:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'},
+  {id:"conversations", name:"Conversations", badge:"5", icon:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
+  {id:"calendar", name:"Calendars", icon:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>'},
+  {id:"contacts", name:"Contacts", icon:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M17 8h4M19 6v4"/>'},
+  {id:"pipeline", name:"Opportunities", icon:'<path d="M4 5h16M4 12h10M4 19h6"/><circle cx="18" cy="12" r="2.4"/><circle cx="12" cy="19" r="2.4"/>'},
+  {sec:"Grow"},
+  {id:"automation", name:"Automation", icon:'<circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="12" cy="18" r="2.4"/><path d="M8.4 6H15.6M6 8.4V13a2 2 0 0 0 2 2h3M18 8.4V13a2 2 0 0 1-2 2h-3"/>'},
+  {id:"sites", name:"Sites &amp; Funnels", icon:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01"/>'},
+  {id:"reputation", name:"Reputation", icon:'<path d="M12 3l2.5 5.2 5.7.8-4.1 4 1 5.7L12 16l-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/>'},
+  {id:"reporting", name:"Reporting", icon:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'}
+];
+
+const PAGE_META = {
+  dashboard:["Dashboard","Welcome back — here's how "+CONFIG.clientName+" is doing this month."],
+  conversations:["Conversations","Every text, email and DM in one inbox."],
+  calendar:["Calendars","Every chair, every stylist, one calendar."],
+  contacts:["Contacts","Smart lists for guests, members and rebooks."],
+  pipeline:["Opportunities","From first DM to loyal regular."],
+  automation:["Automation","Workflows that rebook so stylists can keep cutting."],
+  sites:["Sites & Funnels","New-guest offers, memberships and bridal bookings."],
+  reputation:["Reputation","Reviews requested, earned and answered — automatically."],
+  reporting:["Reporting","Where guests come from and what they turn into."]
+};
+
+let current = "dashboard";
+function renderNav(){
+  $("#navList").innerHTML = NAV.map(n=>{
+    if(n.sec) return `<div class="nav-sec">${n.sec}</div>`;
+    return `<button class="nav-item ${n.id===current?"on":""}" data-nav="${n.id}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">${n.icon}</svg>
+      <span>${n.name}</span>${n.badge?`<span class="badge">${n.badge}</span>`:""}</button>`;
+  }).join("");
+  $$("#navList .nav-item").forEach(b=>b.addEventListener("click",()=>{ go(b.dataset.nav); closeMobileNav(); }));
+}
+function go(id){
+  current=id; renderNav();
+  const [t,s]=PAGE_META[id]; $("#pageTitle").textContent=t; $("#pageSub").textContent=s;
+  const c=$("#content"); c.innerHTML=`<div class="view on">${VIEWS[id]()}</div>`;
+  if(AFTER[id]) AFTER[id]();
+  $("#content").scrollTop=0; window.scrollTo({top:0});
+}
+
+/* ================= DATA ================= */
+const REPS = [["LB","Lena B."],["KD","Kai D."],["RM","Rosa M."],["TS","Tia S."],["JJ","Jay J."]];
+const OPPS = {
+  "New Lead":[
+    ["Amber Julian","Balayage inquiry — IG",180,0],
+    ["Nick Perez","Fade + beard — Google",55,1],
+    ["Dee Salas","Bridal trial — referral",220,2]
+  ],
+  "Contacted":[
+    ["Mia Flores","Color correction",260,3],
+    ["Leo Tran","Kids cut + dad fade",70,1]
+  ],
+  "Booked":[
+    ["Sara Okoye","Cut + gloss — Sat 11a",145,4],
+    ["Andre Wills","Fade — Thu 6p",45,1]
+  ],
+  "Showed":[
+    ["Tessa Reid","Full highlights",210,0],
+    ["Omar Vance","Beard sculpt + lineup",40,1]
+  ],
+  "Regular":[
+    ["Jade Lee","6-week color club",190,4],
+    ["Marco Diaz","Bi-weekly fade",45,1],
+    ["Nia Kane","Monthly blowout member",65,0]
+  ]
+};
+const STAGE_BAND = {"New Lead":"#9096ac","Contacted":"#3d63f0","Booked":"#f5a623","Showed":"#8b5cf6","Regular":"#12b76a"};
+
+const CONVOS = [
+  {n:"Amber Julian", ava:1, ch:"ig", last:"Saturday afternoon if possible!", time:"2m", unread:true,
+   thread:[["in","Hi! Your balayage posts are gorgeous 😍 how much and how long?","10:02a"],["out","Hey Amber! Balayage with Lena runs $180 and about 2.5 hours — includes gloss and style. Want me to check Saturday?","10:04a"],["in","Yes please!","10:05a"],["out","We've got Sat 1:30pm or 3pm. New guests get 20% off their first visit ✨","10:06a"],["in","Saturday afternoon if possible!","10:12a"]]},
+  {n:"Nick Perez", ava:0, ch:"sms", last:"Cool, locked in for 6.", time:"14m", unread:true,
+   thread:[["note","Auto: Missed-call text-back sent","9:40a"],["out","Yo Nick, sorry we missed you! Velvet & Fade here — need a cut this week?","9:40a"],["in","Yeah, fade + beard trim, any evening slots?","9:44a"],["out","Kai has Thu 6pm or Fri 7pm. $55 for the combo, includes hot towel.","9:46a"],["in","Thursday works","9:52a"],["out","Booked ✅ You'll get a reminder day-of. Cool, locked in for 6.","9:53a"],["in","Cool, locked in for 6.","9:58a"]]},
+  {n:"Dee Salas", ava:2, ch:"email", last:"The trial date works — excited!", time:"1h", unread:false,
+   thread:[["out","Hi Dee! Confirming your bridal trial with Rosa on the 14th, 10am. We'll photograph the look so day-of is flawless 💍","Mon"],["in","The trial date works — excited!","Mon"]]},
+  {n:"Jade Lee", ava:4, ch:"sms", last:"Auto: 6-week rebook — sent", time:"3h", unread:true,
+   thread:[["note","Enrolled in workflow: 6-Week Rebook","8:00a"],["out","Hi Jade! It's been 6 weeks since your last color 🎨 Lena has openings Tue & Thu — reply with a day to grab your usual slot.","8:00a"],["note","Auto: 6-week rebook — sent","3h"]]},
+  {n:"Mia Flores", ava:3, ch:"ig", last:"Is a color correction possible?", time:"5h", unread:true,
+   thread:[["in","A box dye went very wrong 😭 can you fix it?","yest"],["out","We've saved worse, promise 💜 Color corrections start with a free 10-min strand consult. Can you send a photo in natural light?","yest"],["in","Is a color correction possible?","5h"]]},
+  {n:"Nia Kane", ava:0, ch:"sms", last:"Renewed! See you next month 💇🏽‍♀️", time:"1d", unread:false,
+   thread:[["out","Hi Nia! Your blowout membership renews this week — reply YES to keep your member rate locked in.","1d"],["in","Renewed! See you next month 💇🏽‍♀️","1d"]]}
+];
+const CH_ICON = {
+  sms:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  email:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+  ig:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>'
+};
+const CH_LABEL = {sms:"SMS", email:"Email", ig:"Instagram"};
+
+/* ================= VIEWS ================= */
+const VIEWS = {};
+
+VIEWS.dashboard = () => {
+  const kpis = [
+    ["ib",'<path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 12l5-3"/>',"New leads","226","up","+16% vs last mo"],
+    ["ig",'<path d="M20 6 9 17l-5-5"/>',"Bookings (mo)","512","up","+12%"],
+    ["ip",'<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 11h18"/>',"Revenue (mo)","$38,900","up","+15%"],
+    ["iw",'<path d="M4 5h16M4 12h10M4 19h6"/>',"Rebook rate","68%","up","+9 pts"]
+  ];
+  const barData=[["Mon",52],["Tue",64],["Wed",59],["Thu",75],["Fri",89],["Sat",85],["Sun",36]];
+  const maxB=Math.max(...barData.map(b=>b[1]));
+  const feed=[
+    ["ig",'phone',"Missed-call recovered — <b>Nick Perez</b>","Fade + beard Thu 6pm · 2m ago"],
+    ["good",'check',"<b>Nia Kane</b> renewed her membership","Monthly blowout · 1h ago"],
+    ["warn",'star',"New 5★ review from <b>Tessa Reid</b>","Google · 2h ago"],
+    ["accent",'cal',"<b>Amber Julian</b> booked balayage","Sat 1:30p · Lena · 3h ago"],
+    ["brand",'bolt',"Workflow <b>6-Week Rebook</b> fired","→ Jade Lee · 3h ago"]
+  ];
+  const fIc={check:'<path d="M20 6 9 17l-5-5"/>',star:'<path d="M12 3l2.5 5.2 5.7.8-4.1 4 1 5.7L12 16l-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/>',cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/>',ig:CH_ICON.ig.replace(/<\/?svg[^>]*>/g,"")};
+  const fBg={ig:"ip",good:"ig",warn:"iw",accent:"ib",brand:"ip"};
+  return `
+  <div class="banner"><span>👋</span><span><b>This is a live, interactive demo</b> of a GoHighLevel sub-account, built by ${esc(CONFIG.agencyName)}. Every number is sample data — click around the left menu, or take the guided tour.</span></div>
+  <div class="kpis">
+    ${kpis.map(([ic,svg,l,v,dir,d])=>`
+      <div class="card kpi"><div class="kt"><span class="ki ${ic}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svg}</svg></span><span class="kl">${l}</span></div>
+      <div class="kv">${v}</div><div class="kd ${dir}">▲ ${d}</div></div>`).join("")}
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-h"><h3>Leads this week</h3><span class="sub">by day</span><span class="link">This month ▾</span></div>
+      <div class="card-pad">
+        <div class="legend"><span><i style="background:var(--accent)"></i>Leads</span></div>
+        <div class="bars" id="dashBars">
+          ${barData.map(([d,v])=>`<div class="bar-col"><span class="bar-val">${v}</span><div class="bar" data-h="${Math.round(v/maxB*100)}" style="height:0"></div><span class="bar-lbl">${d}</span></div>`).join("")}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Recent activity</h3></div>
+      <div class="card-pad" style="padding-top:4px;">
+        <div class="feed">
+          ${feed.map(([tone,ic,txt,meta])=>`<div class="feed-row"><span class="feed-ic ${fBg[tone]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${fIc[ic]}</svg></span><div><div class="ft">${txt}</div><div class="fm">${meta}</div></div></div>`).join("")}
+        </div>
+      </div>
+    </div>
+  </div>`;
+};
+
+VIEWS.pipeline = () => {
+  const stages=Object.keys(OPPS);
+  const total=stages.reduce((a,s)=>a+OPPS[s].reduce((x,o)=>x+o[2],0),0);
+  return `
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+    <div class="card kpi" style="flex:none; padding:12px 16px;"><div class="kl">Total pipeline value</div><div class="kv" style="font-size:22px;">${money(total)}</div></div>
+    <div class="card kpi" style="flex:none; padding:12px 16px;"><div class="kl">Open opportunities</div><div class="kv" style="font-size:22px;">${stages.reduce((a,s)=>a+OPPS[s].length,0)}</div></div>
+    <button class="btn btn-primary" style="margin-left:auto;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Add opportunity</button>
+  </div>
+  <div class="pipe" id="pipe">
+    ${stages.map(st=>{
+      const items=OPPS[st]; const val=items.reduce((a,o)=>a+o[2],0);
+      return `<div class="col"><div class="col-band" style="background:${STAGE_BAND[st]}"></div>
+        <div class="col-h"><span class="cn">${st}</span><span class="cc">${items.length}</span><span class="cv">${money(val)}</span></div>
+        <div class="col-body">
+          ${items.map(([n,s,v,ri])=>`<div class="op"><div class="on">${esc(n)}</div><div class="os">${esc(s)}</div>
+            <div class="op-foot"><span class="op-val">${money(v)}</span>
+            <span class="tag" style="background:${STAGE_BAND[st]}22; color:${STAGE_BAND[st]}">${st==="Regular"?"Regular":"Open"}</span>
+            <span class="op-ava" style="background:${avaColor(ri)}" title="${REPS[ri][1]}">${REPS[ri][0]}</span></div></div>`).join("")}
+        </div></div>`;
+    }).join("")}
+  </div>`;
+};
+
+VIEWS.conversations = () => {
+  return `
+  <div class="conv">
+    <div class="conv-list" id="convList">
+      ${CONVOS.map((c,i)=>`<div class="conv-item ${i===0?"on":""}" data-c="${i}">
+        <span class="conv-ava" style="background:${avaColor(c.ava)}">${c.n.split(" ").map(x=>x[0]).join("")}</span>
+        <div class="conv-meta"><div class="cn">${esc(c.n)} <span style="color:var(--muted)">${CH_ICON[c.ch].replace('width="24" height="24"','')}</span></div><div class="cp">${esc(c.last)}</div></div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;"><span class="conv-time">${c.time}</span>${c.unread?'<span class="un"></span>':''}</div>
+      </div>`).join("")}
+    </div>
+    <div class="thread" id="thread"></div>
+  </div>`;
+};
+function renderThread(i){
+  const c=CONVOS[i];
+  $("#thread").innerHTML=`
+    <div class="thread-h"><span class="conv-ava" style="width:36px;height:36px;background:${avaColor(c.ava)}">${c.n.split(" ").map(x=>x[0]).join("")}</span>
+      <div><div style="font-weight:660;font-size:14px;">${esc(c.n)}</div><div style="font-size:11.5px;color:var(--muted)">${CH_LABEL[c.ch]} · +1 (415) 555‑0${100+i}${i}</div></div>
+      <div class="chan-tabs" style="margin-left:auto;"><span class="chan-tab ${c.ch==="sms"?"on":""}">SMS</span><span class="chan-tab ${c.ch==="email"?"on":""}">Email</span><span class="chan-tab ${c.ch==="ig"?"on":""}">DM</span></div>
+    </div>
+    <div class="thread-body">
+      ${c.thread.map(([who,txt,t])=> who==="note"
+        ? `<div class="msg note">⚡ ${esc(txt)} · ${t}</div>`
+        : `<div class="msg ${who}">${esc(txt)}<div class="mt">${t}</div></div>`).join("")}
+    </div>
+    <div class="thread-input"><span class="chan-tab on">${CH_LABEL[c.ch]}</span><span class="fake">Type a reply… (demo)</span><button class="btn btn-primary">Send</button></div>`;
+  $$("#convList .conv-item").forEach(el=>el.classList.toggle("on", +el.dataset.c===i));
+}
+
+VIEWS.calendar = () => {
+  const appts={4:[["botox","10a Balayage — Amber"]],5:[["consult","11a Cut+gloss — Sara"],["facial","6p Fade — Andre"]],9:[["laser","10a Bridal trial — Dee"]],11:[["botox","9a Color club — Jade"],["consult","2p Highlights — Tessa"]],12:[["facial","1p Blowout — Nia"]],16:[["botox","10a Color correction — Mia"]],17:[["consult","9a Cuts (x4)"],["facial","3p Beard sculpt — Omar"]],18:[["laser","11a Bridal party (3)"]],19:[["botox","5p Fades (x3)"]],24:[["facial","1p Membership blowouts"]],25:[["botox","10a Balayage"]]};
+  const today=11; let cells="";
+  const startPad=2; // month starts Wed
+  for(let i=0;i<startPad;i++) cells+=`<div class="day out"><div class="dn">${28+i}</div></div>`;
+  for(let d=1; d<=30; d++){
+    const a=appts[d]||[];
+    cells+=`<div class="day ${d===today?"today":""}"><div class="dn">${d}</div>${a.map(([t,l])=>`<div class="appt ${t}">${esc(l)}</div>`).join("")}</div>`;
+  }
+  const upcoming=[["10:00","AM","botox","Balayage — Amber J.","New guest 20% · Lena"],["11:30","AM","consult","Color consult — Mia F.","Correction · Rosa"],["1:30","PM","facial","Blowout — Nia K.","Member · Tia"],["6:00","PM","botox","Fade + beard — Nick P.","Hot towel · Kai"]];
+  const upC={botox:"var(--accent)",consult:"var(--warn)",facial:"var(--brand)",laser:"var(--good)"};
+  return `
+  <div class="grid2">
+    <div class="card">
+      <div class="card-h"><h3>June 2026</h3><span class="link">Today ▾</span></div>
+      <div class="card-pad">
+        <div class="cal">${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>`<div class="dow">${d}</div>`).join("")}${cells}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Today · 4 appointments</h3></div>
+      <div class="card-pad" style="padding-top:6px;">
+        ${upcoming.map(([t,ap,ty,ti,su])=>`<div class="up-appt"><span class="up-bar" style="background:${upC[ty]}"></span><div class="up-time"><b>${t}</b><span>${ap}</span></div><div><div style="font-weight:640;font-size:13.5px;">${esc(ti)}</div><div style="font-size:12px;color:var(--muted)">${esc(su)}</div></div></div>`).join("")}
+        <button class="btn btn-ghost" style="width:100%; margin-top:14px; justify-content:center;">View full calendar</button>
+      </div>
+    </div>
+  </div>`;
+};
+
+VIEWS.contacts = () => {
+  const lists=[["All contacts","5,680","ib"],["New leads (30d)","226","iw"],["Members / regulars","318","ig"],["Due to rebook","386","ip"],["Lapsed 90d+","442","iw"]];
+  const rows=[
+    ["Jade Lee","jade.lee@email.com","(415) 555‑0142","Regular · Color club","5",true],
+    ["Amber Julian","amber.j@email.com","(415) 555‑0119","Lead · Balayage","0",false],
+    ["Nick Perez","nick.p@email.com","(415) 555‑0173","Booked · Fade","0",false],
+    ["Nia Kane","nia.k@email.com","(415) 555‑0188","Member · Blowout","5",true],
+    ["Mia Flores","mia.f@email.com","(415) 555‑0164","Lead · Correction","0",false],
+    ["Marco Diaz","marco.d@email.com","(415) 555‑0155","Regular · Fade","4",true]
+  ];
+  return `
+  <div class="grid2">
+    <div class="card">
+      <div class="card-h"><h3>Smart lists</h3><span class="link">+ New list</span></div>
+      <div class="card-pad" style="padding-top:8px;">
+        ${lists.map(([n,c,ic])=>`<div style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--line)"><span class="ki ${ic}" style="width:30px;height:30px;border-radius:8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span><span style="font-weight:580;font-size:13.5px">${n}</span><span style="margin-left:auto;font-weight:700;color:var(--ink-2)">${c}</span></div>`).join("")}
+      </div>
+    </div>
+    <div class="card" style="grid-column:auto;">
+      <div class="card-h"><h3>Recently active</h3><span class="link">Export</span></div>
+      <div class="card-pad" style="padding:0;">
+        <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:420px;">
+          <thead><tr>${["Name","Contact","Tag","★"].map(h=>`<th style="text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--line)">${h}</th>`).join("")}</tr></thead>
+          <tbody>${rows.map(([n,e,p,tg,st,mem],i)=>`<tr style="border-bottom:1px solid var(--line)"><td style="padding:10px 14px;"><div style="display:flex;align-items:center;gap:9px;"><span class="conv-ava" style="width:28px;height:28px;font-size:10px;background:${avaColor(i)}">${n.split(" ").map(x=>x[0]).join("")}</span><b style="font-weight:620">${n}</b></div></td><td style="padding:10px 14px;color:var(--ink-2)">${e}<br><span style="color:var(--muted)">${p}</span></td><td style="padding:10px 14px;"><span class="tag" style="background:var(--accent-soft);color:var(--accent)">${tg}</span></td><td style="padding:10px 14px;color:var(--star);font-weight:700">${st}★</td></tr>`).join("")}</tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>`;
+};
+
+VIEWS.automation = () => {
+  return `
+  <div class="wf-tabs" id="wfTabs">
+    <button class="wf-tab on" data-wf="0"><span class="st"></span>Missed-Call Text-Back</button>
+    <button class="wf-tab" data-wf="1"><span class="st"></span>New Lead Nurture</button>
+    <button class="wf-tab" data-wf="2"><span class="st"></span>Reactivation (90-day)</button>
+  </div>
+  <div class="grid2">
+    <div class="card card-pad" id="wfFlow"></div>
+    <div>
+      <div class="card card-pad" style="margin-bottom:16px;">
+        <div class="card-h" style="padding:0 0 12px;border:none;"><h3 id="wfName">Missed-Call Text-Back</h3></div>
+        <p style="font-size:13px;color:var(--ink-2)" id="wfDesc"></p>
+        <div class="wf-stats" id="wfStats"></div>
+      </div>
+      <div class="card card-pad">
+        <div class="card-h" style="padding:0 0 10px;border:none;"><h3>Why it matters</h3></div>
+        <p style="font-size:13px;color:var(--ink-2)" id="wfWhy"></p>
+      </div>
+    </div>
+  </div>`;
+};
+const WORKFLOWS=[
+  {name:"Missed-Call Text-Back", desc:"When the shop can't pick up mid-cut, the caller gets an instant SMS — so the booking never walks down the street.",
+   why:"Stylists can't answer phones with their hands in someone's hair. The instant text captures bookings the front desk physically can't — 78 appointments booked last month.",
+   stats:[["612","Enrolled"],["78","Bookings"],["12.7%","Reply→book"]],
+   nodes:[["trigger","phone","Trigger","Call status = missed"],["accent","sms","SMS — instant","“Sorry we missed you! Velvet & Fade here 💇 need a slot?”"],["warn","wait","Wait","5 minutes"],["branch",["No reply","Replied"]],["ip","sms","SMS — nudge","“Tap to see this week's openings 👉”"],["good","tag","Tag + assign","Hot lead → front desk"]]},
+  {name:"No-Show Shield", desc:"Deposits on long services plus escalating reminders — cutting no-shows before they cost a chair an afternoon.",
+   why:"A no-show on a 3-hour color block is pure lost revenue. Reminders at 48h/24h/2h plus card-on-file deposits collapsed no-shows from 11% to 3%.",
+   stats:[["512","Bookings (mo)"],["3.1%","No-show rate"],["$4.8k","Saved (mo)"]],
+   nodes:[["trigger","cal","Trigger","Appointment booked"],["accent","sms","SMS — 48h","“Confirming your Sat 1:30 with Lena — reply C to confirm”"],["warn","wait","Wait","Until 2h before"],["branch",["Unconfirmed","Confirmed"]],["ip","sms","SMS — final call","“Still good for today? Reply R to reschedule”"],["good","tag","Tag","Confirmed"]]},
+  {name:"6-Week Rebook", desc:"Rebooks color and cut clients right when the roots do — before they drift to whoever has an opening.",
+   why:"The difference between a client and a regular is the rebook. Automated 6-week nudges keep chairs full with people who already love the work.",
+   stats:[["386","Due to rebook"],["52%","Rebooked"],["$11.2k","Revenue (mo)"]],
+   nodes:[["trigger","clock","Trigger","6 weeks since last visit"],["accent","sms","SMS — time again","“Roots calling 🎨 grab your usual slot with Lena?”"],["warn","wait","Wait","4 days"],["branch",["No reply","Rebooked"]],["ip","sms","SMS — openings","“Tue & Thu have openings this week ⏳”"],["good","tag","Tag","Regular"]]}
+];
+const WF_IC={cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/>',sms:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',email:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',wait:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',tag:'<path d="M20.6 13.4 12 22l-9-9V3h10z"/><circle cx="7.5" cy="7.5" r="1.3" fill="currentColor"/>'};
+const WF_TONE={trigger:"ib",accent:"ib",warn:"iw",ip:"ip",good:"ig"};
+function renderWF(i){
+  const w=WORKFLOWS[i];
+  $("#wfName").textContent=w.name; $("#wfDesc").textContent=w.desc; $("#wfWhy").textContent=w.why;
+  $("#wfStats").innerHTML=w.stats.map(([v,l])=>`<div class="wf-stat"><b>${v}</b><span>${l}</span></div>`).join("");
+  let html='<div class="flow">';
+  w.nodes.forEach((nd,idx)=>{
+    if(idx>0) html+='<div class="connector"></div>';
+    if(nd[0]==="branch"){
+      html+=`<div class="branch-wrap">${nd[1].map(lbl=>`<div style="flex:1;text-align:center"><div class="conn-lbl">${lbl}</div></div>`).join("")}</div>`;
+      return;
+    }
+    const [tone,ic,nn,ndsc]=nd;
+    html+=`<div class="node ${tone==="trigger"?"trigger":""}"><span class="nic ${WF_TONE[tone]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${WF_IC[ic]}</svg></span><div><div class="nn">${nn}</div><div class="nd">${esc(ndsc)}</div></div></div>`;
+  });
+  html+='</div>';
+  $("#wfFlow").innerHTML=html;
+  $$("#wfTabs .wf-tab").forEach(t=>t.classList.toggle("on", +t.dataset.wf===i));
+}
+
+VIEWS.sites = () => {
+  const funnels=[["New Guest Offer (20% off)","Landing → Booking","2,080 views · 27% opt-in","live"],["Bridal Party Booking","Form → Consult","640 views · 21% opt-in","live"],["Color Club Membership","Sales page → Checkout","480 views · 19% opt-in","live"],["Walk-in Waitlist","QR → Join list","In-shop · 31% conv","live"]];
+  return `
+  <div class="grid2b">
+    <div class="card">
+      <div class="card-h"><h3>Booking funnel preview</h3><span class="link">Open builder</span></div>
+      <div class="card-pad">
+        <div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;">
+          <div style="height:130px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:flex;flex-direction:column;justify-content:center;padding:20px;color:#fff;">
+            <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.85">${esc(CONFIG.clientName)}</div>
+            <div style="font-size:20px;font-weight:720;max-width:70%;line-height:1.15;margin-top:4px;">New guest? 20% off your first visit</div>
+          </div>
+          <div style="padding:16px;background:var(--surface);">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Instant booking form</div>
+            <div style="display:grid;gap:8px;">
+              <div style="height:34px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2)"></div>
+              <div style="height:34px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2)"></div>
+              <div style="height:38px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;">Book my appointment →</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Funnels &amp; sites</h3><span class="link">+ New funnel</span></div>
+      <div class="card-pad" style="padding-top:8px;">
+        ${funnels.map(([n,s,st,state])=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)"><span class="ki ${state==="live"?"ig":"iw"}" style="width:34px;height:34px;border-radius:9px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg></span><div style="flex:1"><div style="font-weight:640;font-size:13.5px">${n}</div><div style="font-size:11.5px;color:var(--muted)">${s} · ${st}</div></div><span class="tag" style="background:${state==="live"?"var(--good-bg)":"var(--warn-bg)"};color:${state==="live"?"var(--good)":"var(--warn)"}">${state}</span></div>`).join("")}
+      </div>
+    </div>
+  </div>`;
+};
+
+VIEWS.reputation = () => {
+  const dist=[[5,182],[4,41],[3,9],[2,3],[1,2]];
+  const totalR=dist.reduce((a,d)=>a+d[1],0); const maxR=Math.max(...dist.map(d=>d[1]));
+  const star=(n)=>`<span class="stars">${Array.from({length:5}).map((_,i)=>`<svg viewBox="0 0 24 24" fill="${i<n?"currentColor":"none"}" stroke="currentColor" stroke-width="1.6"><path d="M12 3l2.5 5.2 5.7.8-4.1 4 1 5.7L12 16l-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/></svg>`).join("")}</span>`;
+  const reviews=[
+    ["Tessa R.",0,5,"Google","Lena is a color genius — best highlights I've ever had. Booking by text and the reminders make it effortless.","Thank you Tessa! See you at week six 🎨"],
+    ["Marco D.",1,5,"Google","Kai's fades are surgical. I'm on the every-two-weeks text plan and never think about booking.",""],
+    ["Dee S.",2,5,"Facebook","They made my bridal trial so easy and the photos meant the wedding day look was perfect.",""],
+    ["Omar V.",5,4,"Google","Great lineup and beard work. One star off because Saturday slots go fast — book early.","Thanks Omar — pro tip: the 6-week rebook text holds your spot!"]
+  ];
+  return `
+  <div class="grid2">
+    <div>
+      <div class="card card-pad" style="margin-bottom:16px;">
+        <div class="rep-hero">
+          <div class="rep-score"><div class="big">4.8</div>${star(5)}<div style="font-size:11.5px;color:var(--muted);margin-top:4px;">${totalR} reviews</div></div>
+          <div class="rep-bars">${dist.map(([s,c])=>`<div class="rep-bar"><span>${s} star</span><div class="rep-track"><div class="rep-fill" style="width:${Math.round(c/maxR*100)}%"></div></div><span style="text-align:right;font-weight:600">${c}</span></div>`).join("")}</div>
+        </div>
+      </div>
+      <div class="card card-pad">
+        <div class="kt" style="display:flex;gap:9px;align-items:center;margin-bottom:6px;"><span class="ki ig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><b>Auto review requests</b></div>
+        <p style="font-size:12.5px;color:var(--ink-2)">After every finished appointment, a workflow texts a review link. <b>62%</b> of requests convert to a review — that's why the volume keeps climbing.</p>
+        <div class="wf-stats" style="margin-top:12px;"><div class="wf-stat"><b>96</b><span>Requests (mo)</span></div><div class="wf-stat"><b>59</b><span>New reviews</span></div><div class="wf-stat"><b>+0.3</b><span>Rating (90d)</span></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Recent reviews</h3><span class="link">Respond ▾</span></div>
+      <div class="card-pad" style="padding-top:6px;">
+        ${reviews.map(([n,ai,rt,src,txt,reply])=>`<div class="review"><span class="rv-ava" style="background:${avaColor(ai)}">${n.split(" ").map(x=>x[0]).join("")}</span><div style="flex:1"><div class="rv-top"><span class="rv-n">${n}</span>${star(rt)}<span class="src">${src}</span></div><p>${esc(txt)}</p>${reply?`<div class="rv-reply"><b>${esc(CONFIG.clientName)} replied:</b> ${esc(reply)}</div>`:`<button class="btn btn-ghost" style="margin-top:8px;padding:5px 11px;font-size:12px;">Reply with AI ✨</button>`}</div></div>`).join("")}
+      </div>
+    </div>
+  </div>`;
+};
+
+VIEWS.reporting = () => {
+  const sources=[["Instagram",42,"#e0679a"],["Google",24,"#3d63f0"],["Referral",18,"#12b76a"],["TikTok",10,"#f5a623"],["Walk-in",6,"#9096ac"]];
+  const funnel=[["Leads",226,100],["Booked",168,74],["Showed",152,67],["Rebooked",103,46],["Regulars",61,27]];
+  // donut
+  let acc=0; const R=60,C=2*Math.PI*R;
+  const segs=sources.map(([n,v,col])=>{ const frac=v/100; const dash=`${(frac*C).toFixed(1)} ${C.toFixed(1)}`; const off=-acc*C; acc+=frac; return `<circle cx="75" cy="75" r="${R}" fill="none" stroke="${col}" stroke-width="22" stroke-dasharray="${dash}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 75 75)"/>`; }).join("");
+  return `
+  <div class="grid2b">
+    <div class="card">
+      <div class="card-h"><h3>Where leads come from</h3><span class="sub">last 30 days</span></div>
+      <div class="card-pad">
+        <div class="don-wrap">
+          <svg class="donut" viewBox="0 0 150 150">${segs}<circle cx="75" cy="75" r="46" fill="var(--surface)"/><text x="75" y="70" text-anchor="middle" font-size="24" font-weight="720" fill="var(--ink)">226</text><text x="75" y="88" text-anchor="middle" font-size="11" fill="var(--muted)">leads</text></svg>
+          <div class="don-legend">${sources.map(([n,v,c])=>`<div class="dl-row"><span class="sw" style="background:${c}"></span>${n}<span class="dv">${v}%</span></div>`).join("")}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Lead → member funnel</h3><span class="sub">this month</span></div>
+      <div class="card-pad">
+        <div class="funnel-rows">
+          ${funnel.map(([n,v,pct])=>`<div class="fn-row"><span>${n}</span><div class="fn-track"><div class="fn-fill" style="width:${pct}%">${pct}%</div></div><span class="fn-val">${v}</span></div>`).join("")}
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-top:14px;">Show rate is <b style="color:var(--good)">96.9%</b> — the No-Show Shield at work — automated reminders do the heavy lifting.</p>
+      </div>
+    </div>
+  </div>
+  <div class="kpis" style="margin-top:16px;">
+    ${[["Revenue / lead","$172","ib"],["Cost / booking","$6","ig"],["Avg. ticket","$76","ip"],["No-show rate","3.1%","iw"]].map(([l,v,ic])=>`<div class="card kpi"><div class="kt"><span class="ki ${ic}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="kl">${l}</span></div><div class="kv">${v}</div></div>`).join("")}
+  </div>`;
+};
+
+/* ============ AFTER-render hooks ============ */
+const AFTER = {
+  dashboard(){ requestAnimationFrame(()=>$$("#dashBars .bar").forEach(b=>b.style.height=b.dataset.h+"%")); },
+  conversations(){ $$("#convList .conv-item").forEach(el=>el.addEventListener("click",()=>renderThread(+el.dataset.c))); renderThread(0); },
+  automation(){ $$("#wfTabs .wf-tab").forEach(t=>t.addEventListener("click",()=>renderWF(+t.dataset.wf))); renderWF(0); }
+};
+
+/* ============ Chrome: theme, mobile, notifications ============ */
+$("#themeBtn").addEventListener("click",()=>{ const c=document.documentElement.dataset.theme==="dark"?"light":"dark"; document.documentElement.dataset.theme=c; try{localStorage.setItem("ghl-theme",c);}catch(e){} });
+(function(){ let t=null; try{t=localStorage.getItem("ghl-theme");}catch(e){} if(t) document.documentElement.dataset.theme=t; })();
+$("#menuBtn").addEventListener("click",()=>{ $("#side").classList.add("open"); $("#scrim").classList.add("on"); });
+function closeMobileNav(){ $("#side").classList.remove("open"); $("#scrim").classList.remove("on"); }
+$("#scrim").addEventListener("click",closeMobileNav);
+$("#notifBtn").addEventListener("click",()=>go("conversations"));
+
+/* apply CONFIG */
+$("#acctName").textContent=CONFIG.clientName; $("#acctLogo").textContent=CONFIG.clientInitial; $("#acctSub").textContent=CONFIG.clientType+" · Sub-account";
+$("#agencyName").textContent=CONFIG.agencyName; $("#agencyAva").textContent=(CONFIG.agencyName.trim()[0]||"A").toUpperCase();
+
+/* ============ Guided tour ============ */
+const TOUR=[
+  {nav:"dashboard", sel:".kpis", t:"The at-a-glance dashboard", b:"Every sub-account opens here: leads, bookings, revenue and rebook rate — the numbers a shop owner checks between clients."},
+  {nav:"conversations", sel:".conv", t:"One inbox for everything", b:"IG DMs, texts and email in one thread per guest. The ⚡ notes are automation booking while stylists' hands are busy."},
+  {nav:"pipeline", sel:"#pipe", t:"A pipeline that fits a salon", b:"From first DM to loyal regular: new lead → booked → showed → regular, with live value per column."},
+  {nav:"automation", sel:"#wfFlow", t:"Workflows do the follow-up", b:"Missed-call text-back, the No-Show Shield and the 6-week rebook — each with real numbers on the chairs it fills."},
+  {nav:"reputation", sel:".rep-hero", t:"Reviews on autopilot", b:"Every finished appointment triggers a review request. More 5-star reviews → more new guests from IG and Google."},
+  {nav:"reporting", sel:".don-wrap", t:"Proof it's working", b:"Lead sources, the lead→regular funnel, and the no-show rate — so the owner sees exactly what's driving the chairs."}
+];
+let ti=-1, tmask=null, tcard=null;
+$("#tourBtn").addEventListener("click",()=>{ ti=0; showTour(); });
+function endTour(){ ti=-1; if(tmask){tmask.remove();tmask=null;} if(tcard){tcard.remove();tcard=null;} }
+function showTour(){
+  const s=TOUR[ti]; if(!s){ endTour(); return; }
+  if(current!==s.nav) go(s.nav);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const el=$(s.sel); if(!el){ endTour(); return; }
+    el.scrollIntoView({block:"center",behavior:"instant"});
+    const r=el.getBoundingClientRect(), pad=8;
+    if(!tmask){ tmask=document.createElement("div"); tmask.className="tour-mask"; document.body.appendChild(tmask); }
+    if(!tcard){ tcard=document.createElement("div"); tcard.className="tour-card"; document.body.appendChild(tcard); }
+    tmask.style.left=(r.left-pad)+"px"; tmask.style.top=(r.top-pad)+"px"; tmask.style.width=(r.width+pad*2)+"px"; tmask.style.height=(r.height+pad*2)+"px";
+    tcard.innerHTML=`<div class="tc">Tour · ${ti+1} of ${TOUR.length}</div><h4>${s.t}</h4><p>${s.b}</p><div class="tour-nav"><button class="btn btn-ghost" id="tp" ${ti===0?"disabled":""}>← Back</button><button class="btn btn-primary" id="tn">${ti===TOUR.length-1?"Finish":"Next →"}</button><button class="tour-close" id="tx">Exit</button></div>`;
+    const below=r.bottom+180<window.innerHeight;
+    tcard.style.top=below?Math.min(r.bottom+14,window.innerHeight-210)+"px":Math.max(r.top-200,12)+"px";
+    tcard.style.left=Math.max(12,Math.min(r.left,window.innerWidth-360))+"px";
+    $("#tn").addEventListener("click",()=>{ti++;showTour();}); $("#tp").addEventListener("click",()=>{ti--;showTour();}); $("#tx").addEventListener("click",endTour);
+  }));
+}
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") endTour(); });
+
+/* boot */
+renderNav(); go("dashboard");
+</script>
+</body>
+</html>
