@@ -81,6 +81,19 @@
   .sr-sub{font-size:11.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .sr-type{font-size:10px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; color:var(--accent); background:var(--accent-soft); padding:3px 8px; border-radius:99px; flex:none;}
   .sr-empty{padding:20px 12px; text-align:center; color:var(--muted); font-size:13px;}
+  .kbd{font-size:10.5px; font-weight:700; color:var(--muted); background:var(--surface); border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:1px 5px; min-width:17px; text-align:center; line-height:1.5;}
+  .search .kbd{flex:none;} .search:focus-within .kbd{opacity:0;}
+  /* keyboard-shortcuts overlay */
+  .sc-scrim{position:fixed; inset:0; background:rgba(10,12,20,.5); z-index:200; display:none; align-items:center; justify-content:center; padding:20px;}
+  .sc-scrim.on{display:flex; animation:fade .18s ease;}
+  .sc-modal{background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow-lg); width:100%; max-width:440px; overflow:hidden;}
+  .sc-h{padding:15px 20px; border-bottom:1px solid var(--line); font-weight:720; font-size:15px; display:flex; align-items:center; gap:9px;}
+  .sc-h svg{width:18px; height:18px; stroke:var(--accent);}
+  .sc-body{padding:6px 20px 16px; max-height:64vh; overflow-y:auto;}
+  .sc-row{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px; color:var(--ink-2);}
+  .sc-row:last-child{border-bottom:none;}
+  .sc-keys{display:flex; align-items:center; gap:5px; flex:none;}
+  .sc-keys .then{color:var(--muted); font-size:11px;}
   .tb-btn{width:38px; height:38px; border-radius:9px; border:1px solid var(--line); background:var(--surface); display:grid; place-items:center; position:relative;}
   .tb-btn:hover{background:var(--surface-2);}
   .tb-btn svg{width:17px; height:17px; stroke:var(--ink-2);}
@@ -359,7 +372,7 @@
         <div class="page-sub" id="pageSub">Welcome back — here's how Velvet & Fade is doing this month.</div>
       </div>
       <div class="search-wrap">
-        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4" stroke-linecap="round"/></svg><input id="searchInput" type="text" placeholder="Search contacts, deals…" autocomplete="off" aria-label="Search"></div>
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4" stroke-linecap="round"/></svg><input id="searchInput" type="text" placeholder="Search contacts, deals…" autocomplete="off" aria-label="Search"><kbd class="kbd" aria-hidden="true">/</kbd></div>
         <div class="search-results" id="searchResults" hidden></div>
       </div>
       <span class="demochip">Interactive demo</span>
@@ -1073,6 +1086,24 @@ $("#searchInput").addEventListener("input",e=>runSearch(e.target.value));
 $("#searchInput").addEventListener("focus",e=>{ if(e.target.value.trim()) runSearch(e.target.value); });
 document.addEventListener("click",e=>{ const w=$(".search-wrap"); if(w && !w.contains(e.target)) hideSearch(); });
 
+/* ============ Keyboard shortcuts ============ */
+const SC_LIST=[["/","Focus search"],["⌘ K","Focus search"],["g then d","Dashboard"],["g then c","Conversations"],["g then p","Pipeline"],["g then l","Calendars"],["g then o","Contacts"],["g then a","Automation"],["g then s","Sites & Funnels"],["g then r","Reporting"],["g then v","Reputation"],["?","Show this help"],["Esc","Close / dismiss"]];
+const GKEY={d:"dashboard",c:"conversations",p:"pipeline",l:"calendar",o:"contacts",a:"automation",s:"sites",r:"reporting",v:"reputation"};
+let scModal=null;
+function buildSC(){ if(scModal) return; scModal=document.createElement("div"); scModal.className="sc-scrim";
+  scModal.innerHTML=`<div class="sc-modal" role="dialog" aria-label="Keyboard shortcuts"><div class="sc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M18 13h.01M9 13h6"/></svg>Keyboard shortcuts</div><div class="sc-body">${SC_LIST.map(([k,d])=>`<div class="sc-row"><span>${d}</span><span class="sc-keys">${k.split(" then ").map(x=>`<kbd class="kbd">${x}</kbd>`).join('<span class="then">then</span>')}</span></div>`).join("")}</div></div>`;
+  document.body.appendChild(scModal); scModal.addEventListener("click",e=>{ if(e.target===scModal) toggleSC(false); }); }
+function toggleSC(force){ buildSC(); const open=force===undefined?!scModal.classList.contains("on"):force; scModal.classList.toggle("on",open); }
+let gPending=false, gTimer=null;
+document.addEventListener("keydown",e=>{
+  if((e.metaKey||e.ctrlKey) && (e.key==="k"||e.key==="K")){ e.preventDefault(); const s=$("#searchInput"); if(s) s.focus(); return; }
+  const t=e.target, tag=(t.tagName||"").toLowerCase(); if(tag==="input"||tag==="textarea"||t.isContentEditable) return;
+  if(e.key==="?" || (e.key==="/" && e.shiftKey)){ e.preventDefault(); toggleSC(); return; }
+  if(e.key==="/"){ e.preventDefault(); const s=$("#searchInput"); if(s) s.focus(); return; }
+  if(gPending){ gPending=false; clearTimeout(gTimer); const dest=GKEY[e.key.toLowerCase()]; if(dest){ e.preventDefault(); go(dest); } return; }
+  if(e.key==="g"||e.key==="G"){ gPending=true; gTimer=setTimeout(()=>{gPending=false;},1200); }
+});
+
 /* apply CONFIG */
 $("#acctName").textContent=CONFIG.clientName; $("#acctLogo").textContent=CONFIG.clientInitial; $("#acctSub").textContent=CONFIG.clientType+" · Sub-account";
 $("#agencyName").textContent=CONFIG.agencyName; $("#agencyAva").textContent=(CONFIG.agencyName.trim()[0]||"A").toUpperCase();
@@ -1108,7 +1139,7 @@ function showTour(){
     $("#tn").addEventListener("click",()=>{ti++;showTour();}); $("#tp").addEventListener("click",()=>{ti--;showTour();}); $("#tx").addEventListener("click",endTour);
   }));
 }
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ endTour(); closeDrawer(); toggleNotif(false); hideSearch(); } });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ endTour(); closeDrawer(); toggleNotif(false); hideSearch(); if(scModal&&scModal.classList.contains("on")) toggleSC(false); } });
 
 /* boot */
 renderNav(); go("dashboard");
