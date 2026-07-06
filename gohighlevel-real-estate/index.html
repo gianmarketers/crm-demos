@@ -314,6 +314,8 @@
   .dw-form .row2{display:grid; grid-template-columns:1fr 1fr; gap:11px;}
   .dw-save{display:flex; gap:10px; padding:14px 18px; border-top:1px solid var(--line);}
   .dw-save .btn{flex:1; justify-content:center;}
+  .dw-advance{width:100%; justify-content:center; margin-top:14px;}
+  .dw-wonbar{margin-top:14px; text-align:center; font-weight:700; font-size:13px; color:var(--good); background:var(--good-bg); border:1px solid color-mix(in srgb,var(--good) 30%,transparent); border-radius:10px; padding:11px;}
   /* clickable funnel rows + in-drawer conversion mini-funnel */
   .funnel-row{display:flex; align-items:center; gap:12px; width:100%; padding:12px 6px; border:none; border-bottom:1px solid var(--line); background:none; text-align:left; font-family:inherit; cursor:pointer; transition:background .12s; border-radius:6px;}
   .funnel-row:hover{background:var(--surface-2);}
@@ -977,12 +979,24 @@ function openOpp(d){
       </div>
       <div class="dw-sec">Next step</div>
       <div class="dw-next"><span style="color:var(--accent);font-weight:800;">➤</span><div class="nt"><b>Automated</b>${esc(next)}</div></div>
+      ${last?`<div class="dw-wonbar">✓ Won — ${money(+d.v)} closed</div>`:`<button class="btn btn-primary dw-advance" id="dwAdvance">Move to “${esc(stages[si+1])}” →</button>`}
     </div>
     <div class="dw-actions">
       ${ACT.map(([l,p])=>`<button class="dw-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>${l}</button>`).join("")}
     </div>`;
   $("#drawer").classList.add("on"); $("#drawerScrim").classList.add("on"); $("#drawer").setAttribute("aria-hidden","false");
   $("#dwX").addEventListener("click",closeDrawer);
+  const adv=$("#dwAdvance"); if(adv) adv.addEventListener("click",()=>advanceOpp(d));
+}
+function advanceOpp(d){
+  const stages=Object.keys(OPPS); const si=stages.indexOf(d.st);
+  if(si<0 || si>=stages.length-1) return;
+  const arr=OPPS[d.st];
+  const idx=arr.findIndex(o=>o[0]===d.n && o[1]===d.s && String(o[2])===String(d.v) && String(o[3])===String(d.ri));
+  if(idx<0){ closeDrawer(); return; }
+  const [opp]=arr.splice(idx,1); const nextStage=stages[si+1]; OPPS[nextStage].push(opp);
+  closeDrawer(); go("pipeline");
+  requestAnimationFrame(()=>{ const col=$$("#pipe .col")[si+1]; if(col){ const cards=col.querySelectorAll(".op[data-op]"); const card=cards[cards.length-1]; if(card){ card.classList.add("op-new"); card.scrollIntoView({block:"nearest"}); setTimeout(()=>card.classList.remove("op-new"),1500); } } });
 }
 function closeDrawer(){ const d=$("#drawer"); if(!d) return; d.classList.remove("on"); const s=$("#drawerScrim"); if(s) s.classList.remove("on"); d.setAttribute("aria-hidden","true"); }
 $("#drawerScrim").addEventListener("click",closeDrawer);
