@@ -263,6 +263,17 @@
   .cf-chip.on{background:var(--accent); color:#fff; border-color:transparent;} .cf-chip.on b{color:rgba(255,255,255,.8);}
   .crow{cursor:pointer; transition:background .1s;}
   .crow:hover{background:var(--surface-2);} .crow:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
+  /* notifications dropdown */
+  .notif-panel{position:fixed; top:60px; right:20px; width:308px; max-width:calc(100vw - 32px); background:var(--surface); border:1px solid var(--hairline); border-radius:12px; box-shadow:var(--shadow-lg); z-index:60; overflow:hidden; padding:6px; animation:fade .15s ease;}
+  .notif-panel[hidden]{display:none;}
+  .np-h{display:flex; justify-content:space-between; align-items:center; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding:8px 10px 6px;}
+  .np-h span{background:var(--accent); color:#fff; border-radius:99px; padding:1px 7px; font-size:11px;}
+  .np-item{display:flex; gap:10px; align-items:center; width:100%; text-align:left; padding:9px 10px; border-radius:8px;}
+  .np-item:hover{background:var(--surface-2);}
+  .np-item .feed-ic{width:30px; height:30px; border-radius:8px; flex:none; display:grid; place-items:center;} .np-item .feed-ic svg{width:15px; height:15px;}
+  .np-t{font-size:13px; font-weight:600;} .np-m{font-size:11.5px; color:var(--muted);}
+  .np-all{width:100%; text-align:center; padding:9px; font-size:12.5px; font-weight:600; color:var(--accent); border-top:1px solid var(--line); margin-top:4px;}
+  .np-all:hover{background:var(--surface-2);}
 
   .mobile-note{display:none;}
   @media(max-width:720px){
@@ -308,6 +319,7 @@
       <button class="tb-btn" id="tourBtn" title="Guided tour" aria-label="Guided tour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9a3 3 0 0 1 5.6 1c0 2-3 2.5-3 4"/><circle cx="12" cy="17.4" r=".6" fill="currentColor"/></svg></button>
       <button class="tb-btn" id="themeBtn" title="Theme" aria-label="Theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg></button>
       <button class="tb-btn" id="notifBtn" title="Notifications" aria-label="Notifications"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+      <div class="notif-panel" id="notifPanel" hidden></div>
     </div>
     <div class="content" id="content"></div>
   </div>
@@ -858,7 +870,20 @@ $("#themeBtn").addEventListener("click",()=>{ const c=document.documentElement.d
 $("#menuBtn").addEventListener("click",()=>{ $("#side").classList.add("open"); $("#scrim").classList.add("on"); });
 function closeMobileNav(){ $("#side").classList.remove("open"); $("#scrim").classList.remove("on"); }
 $("#scrim").addEventListener("click",closeMobileNav);
-$("#notifBtn").addEventListener("click",()=>go("conversations"));
+function renderNotifs(){
+  const NIC={msg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',star:'<path d="M12 3l2.5 5.2 5.7.8-4.1 4 1 5.7L12 16l-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/>',pay:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>'};
+  const NB={msg:'ib',star:'iw',pay:'ig'};
+  const items=[{t:"New 5★ review",m:"Google · 2h ago",k:'star',go:'reputation'}];
+  CONVOS.filter(c=>c.unread).slice(0,3).forEach(c=>items.push({t:`New message — ${c.n}`, m:`${CH_LABEL[c.ch]} · ${c.time}`, k:'msg', go:'conversations'}));
+  items.push({t:"Payment received",m:"1h ago",k:'pay',go:'reporting'});
+  $("#notifPanel").innerHTML = `<div class="np-h">Notifications <span>${items.length}</span></div>`+
+    items.map(n=>`<button class="np-item" data-go="${n.go}"><span class="feed-ic ${NB[n.k]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${NIC[n.k]}</svg></span><div><div class="np-t">${esc(n.t)}</div><div class="np-m">${n.m}</div></div></button>`).join("")+
+    `<button class="np-all" data-go="conversations">View all in Conversations →</button>`;
+  $$("#notifPanel [data-go]").forEach(b=>b.addEventListener("click",()=>{ toggleNotif(false); go(b.dataset.go); }));
+}
+function toggleNotif(force){ const p=$("#notifPanel"); if(!p) return; const open = (force===undefined) ? p.hasAttribute("hidden") : force; if(open){ renderNotifs(); p.removeAttribute("hidden"); } else { p.setAttribute("hidden",""); } }
+$("#notifBtn").addEventListener("click",e=>{ e.stopPropagation(); toggleNotif(); });
+document.addEventListener("click",e=>{ const p=$("#notifPanel"); if(p && !p.hasAttribute("hidden") && !p.contains(e.target) && !$("#notifBtn").contains(e.target)) toggleNotif(false); });
 
 /* apply CONFIG */
 $("#acctName").textContent=CONFIG.clientName; $("#acctLogo").textContent=CONFIG.clientInitial; $("#acctSub").textContent=CONFIG.clientType+" · Sub-account";
@@ -895,7 +920,7 @@ function showTour(){
     $("#tn").addEventListener("click",()=>{ti++;showTour();}); $("#tp").addEventListener("click",()=>{ti--;showTour();}); $("#tx").addEventListener("click",endTour);
   }));
 }
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ endTour(); closeDrawer(); } });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ endTour(); closeDrawer(); toggleNotif(false); } });
 
 /* boot */
 renderNav(); go("dashboard");
