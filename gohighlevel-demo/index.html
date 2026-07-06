@@ -456,9 +456,10 @@ let current = "dashboard";
 function renderNav(){
   $("#navList").innerHTML = NAV.map(n=>{
     if(n.sec) return `<div class="nav-sec">${n.sec}</div>`;
+    const badge = n.id==="conversations" ? (CONVOS.filter(c=>c.unread).length||"") : (n.badge||"");
     return `<button class="nav-item ${n.id===current?"on":""}" data-nav="${n.id}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">${n.icon}</svg>
-      <span>${n.name}</span>${n.badge?`<span class="badge">${n.badge}</span>`:""}</button>`;
+      <span>${n.name}</span>${badge?`<span class="badge">${badge}</span>`:""}</button>`;
   }).join("");
   $$("#navList .nav-item").forEach(b=>b.addEventListener("click",()=>{ go(b.dataset.nav); closeMobileNav(); }));
 }
@@ -623,6 +624,12 @@ VIEWS.conversations = () => {
 };
 function renderThread(i){
   const c=CONVOS[i];
+  if(c.unread){
+    c.unread=false; renderNav();
+    const item=$(`#convList .conv-item[data-c="${i}"]`);
+    if(item){ item.dataset.unread="0"; const dot=item.querySelector(".un"); if(dot) dot.remove(); }
+    const chip=$('#convFilter .cf-chip[data-f="unread"] b'); if(chip) chip.textContent=CONVOS.filter(x=>x.unread).length;
+  }
   $("#thread").innerHTML=`
     <div class="thread-h"><span class="conv-ava" style="width:36px;height:36px;background:${avaColor(c.ava)}">${c.n.split(" ").map(x=>x[0]).join("")}</span>
       <div><div style="font-weight:660;font-size:14px;">${esc(c.n)}</div><div style="font-size:11.5px;color:var(--muted)">${CH_LABEL[c.ch]} · +1 (415) 555‑0${100+i}${i}</div></div>
