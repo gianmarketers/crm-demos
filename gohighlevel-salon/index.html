@@ -226,6 +226,15 @@
   .wf-tab{padding:8px 14px; border-radius:9px; font-size:13px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink-2);}
   .wf-tab.on{background:var(--accent); color:#fff; border-color:transparent;}
   .wf-tab .st{display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px; background:var(--good);}
+  .wf-toggle{display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; font-weight:600; color:var(--ink-2);}
+  .wf-toggle input{position:absolute; opacity:0; width:0; height:0;}
+  .wf-sw{width:36px; height:20px; border-radius:99px; background:var(--surface-3); position:relative; transition:background .18s; flex:none;}
+  .wf-sw::after{content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:transform .18s;}
+  .wf-toggle input:checked + .wf-sw{background:var(--good);}
+  .wf-toggle input:checked + .wf-sw::after{transform:translateX(16px);}
+  .wf-toggle input:focus-visible + .wf-sw{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent);}
+  .wf-paused-note{background:var(--warn-bg); color:var(--warn); font-size:12px; font-weight:600; padding:9px 12px; border-radius:9px; margin-bottom:14px;}
+  #wfFlow.paused .node{opacity:.5; filter:grayscale(.45);}
   .flow{max-width:420px; margin:0 auto; display:flex; flex-direction:column; align-items:center; padding:6px 0;}
   .node{width:100%; background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:13px 15px; display:flex; gap:12px; align-items:center; box-shadow:var(--shadow);}
   .node.trigger{border-color:var(--accent); background:var(--accent-soft);}
@@ -746,7 +755,7 @@ VIEWS.automation = () => {
     <div class="card card-pad" id="wfFlow"></div>
     <div>
       <div class="card card-pad" style="margin-bottom:16px;">
-        <div class="card-h" style="padding:0 0 12px;border:none;"><h3 id="wfName">Missed-Call Text-Back</h3></div>
+        <div class="card-h" style="padding:0 0 12px;border:none;"><h3 id="wfName">Missed-Call Text-Back</h3><label class="wf-toggle" style="margin-left:auto;" title="Turn this workflow on or off"><input type="checkbox" id="wfActive" checked aria-label="Workflow active"><span class="wf-sw"></span><span id="wfActiveLbl">Active</span></label></div>
         <p style="font-size:13px;color:var(--ink-2)" id="wfDesc"></p>
         <div class="wf-stats" id="wfStats"></div>
       </div>
@@ -773,9 +782,12 @@ const WORKFLOWS=[
 ];
 const WF_IC={cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/>',sms:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',email:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',wait:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',tag:'<path d="M20.6 13.4 12 22l-9-9V3h10z"/><circle cx="7.5" cy="7.5" r="1.3" fill="currentColor"/>'};
 const WF_TONE={trigger:"ib",accent:"ib",warn:"iw",ip:"ip",good:"ig"};
+const WF_STATE=WORKFLOWS.map(()=>true); let curWF=0;
 function renderWF(i){
-  const w=WORKFLOWS[i];
+  curWF=i; const w=WORKFLOWS[i]; const active=WF_STATE[i];
   $("#wfName").textContent=w.name; $("#wfDesc").textContent=w.desc; $("#wfWhy").textContent=w.why;
+  const at=$("#wfActive"); if(at) at.checked=active;
+  const al=$("#wfActiveLbl"); if(al) al.textContent=active?"Active":"Paused";
   $("#wfStats").innerHTML=w.stats.map(([v,l])=>`<div class="wf-stat"><b>${v}</b><span>${l}</span></div>`).join("");
   let html='<div class="flow">';
   w.nodes.forEach((nd,idx)=>{
@@ -788,9 +800,10 @@ function renderWF(i){
     html+=`<div class="node ${tone==="trigger"?"trigger":""}" data-node tabindex="0" role="button" data-nn="${esc(nn)}" data-nd="${esc(ndsc)}" data-ic="${ic}" data-tone="${tone}"><span class="nic ${WF_TONE[tone]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${WF_IC[ic]}</svg></span><div><div class="nn">${nn}</div><div class="nd">${esc(ndsc)}</div></div></div>`;
   });
   html+='</div>';
-  $("#wfFlow").innerHTML=html;
+  const flow=$("#wfFlow"); flow.classList.toggle("paused",!active);
+  flow.innerHTML=(active?"":`<div class="wf-paused-note">⏸ This workflow is paused — new contacts won't be enrolled until you switch it back on.</div>`)+html;
   $$("#wfFlow .node[data-node]").forEach(el=>{ const open=()=>openNode(el.dataset,w); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); open(); } }); });
-  $$("#wfTabs .wf-tab").forEach(t=>t.classList.toggle("on", +t.dataset.wf===i));
+  $$("#wfTabs .wf-tab").forEach((t,idx)=>{ t.classList.toggle("on", idx===i); const st=t.querySelector(".st"); if(st) st.style.background=WF_STATE[idx]?"var(--good)":"var(--muted)"; });
 }
 function openNode(d,w){
   const TYPE={sms:"Send SMS",email:"Send Email",wait:"Wait / Delay",clock:"Wait / Delay",bolt:"Trigger",phone:"Trigger — Missed call",tag:"Tag & Assign"}[d.ic]||"Step";
@@ -941,7 +954,7 @@ VIEWS.reporting = () => {
 const AFTER = {
   dashboard(){ requestAnimationFrame(()=>$$("#dashBars .bar").forEach(b=>b.style.height=b.dataset.h+"%")); $$(".feed-row[data-fgo]").forEach(el=>el.addEventListener("click",()=>go(el.dataset.fgo))); },
   conversations(){ $$("#convList .conv-item").forEach(el=>el.addEventListener("click",()=>renderThread(+el.dataset.c))); $$("#convFilter .cf-chip").forEach(ch=>ch.addEventListener("click",()=>{ $$("#convFilter .cf-chip").forEach(x=>x.classList.remove("on")); ch.classList.add("on"); const f=ch.dataset.f; $$("#convList .conv-item").forEach(el=>{ const show=f==="all"||(f==="unread"?el.dataset.unread==="1":el.dataset.ch===f); el.style.display=show?"":"none"; }); })); renderThread(0); },
-  automation(){ $$("#wfTabs .wf-tab").forEach(t=>t.addEventListener("click",()=>renderWF(+t.dataset.wf))); renderWF(0); },
+  automation(){ $$("#wfTabs .wf-tab").forEach(t=>t.addEventListener("click",()=>renderWF(+t.dataset.wf))); const tog=$("#wfActive"); if(tog) tog.addEventListener("change",()=>{ WF_STATE[curWF]=tog.checked; renderWF(curWF); }); renderWF(0); },
   pipeline(){ $$("[data-op]").forEach(el=>{ const open=()=>openOpp(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); open(); } }); }); const ab=$("#addOppBtn"); if(ab) ab.addEventListener("click",openNewOpp); },
   contacts(){ $$(".crow").forEach(el=>{ const open=()=>openContact(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); open(); } }); }); },
   calendar(){ $$("[data-appt]").forEach(el=>{ const open=()=>openAppt(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); open(); } }); });
