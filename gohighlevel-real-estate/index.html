@@ -455,7 +455,7 @@ VIEWS.dashboard = () => {
       <div class="card-pad">
         <div class="legend"><span><i style="background:var(--accent)"></i>Leads</span></div>
         <div class="bars" id="dashBars">
-          ${barData.map(([d,v])=>`<div class="bar-col"><span class="bar-val">${v}</span><div class="bar" data-h="${Math.round(v/maxB*100)}" style="height:0"></div><span class="bar-lbl">${d}</span></div>`).join("")}
+          ${barData.map(([d,v])=>`<div class="bar-col"><span class="bar-val">${v}</span><div class="bar" data-h="${Math.round(v/maxB*100)}" style="height:0" title="${d}: ${v}"></div><span class="bar-lbl">${d}</span></div>`).join("")}
         </div>
       </div>
     </div>
@@ -730,6 +730,20 @@ VIEWS.reporting = () => {
           ${funnel.map(([n,v,pct])=>`<div class="fn-row"><span>${n}</span><div class="fn-track"><div class="fn-fill" style="width:${pct}%">${pct}%</div></div><span class="fn-val">${v}</span></div>`).join("")}
         </div>
         <p style="font-size:12px;color:var(--muted);margin-top:14px;">Appointment→under-contract rate is <b style="color:var(--good)">22%</b> — automated reminders do the heavy lifting.</p>
+      </div>
+    </div>
+  </div>
+  <div class="grid2b" style="margin-top:16px;">
+    <div class="card">
+      <div class="card-h"><h3>Team leaderboard</h3><span class="sub">by open pipeline value</span></div>
+      <div class="card-pad" style="padding-top:8px;">
+        ${(()=>{ const board=REPS.map((r,i)=>({r,i,deals:0,val:0})); Object.values(OPPS).forEach(items=>items.forEach(([n,s,v,ri])=>{ if(board[ri]){board[ri].deals++; board[ri].val+=v;} })); board.sort((a,b)=>b.val-a.val); const mx=Math.max(1,...board.map(b=>b.val)); return board.map((b,rank)=>`<div style="display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--line)"><span style="width:16px;font-weight:700;color:var(--muted);font-size:12px">${rank+1}</span><span class="conv-ava" style="width:30px;height:30px;font-size:10px;background:${avaColor(b.i)}">${b.r[0]}</span><div style="flex:1;min-width:0"><div style="font-weight:640;font-size:13px">${esc(b.r[1])}</div><div style="height:6px;border-radius:99px;margin-top:4px;background:var(--surface-3);overflow:hidden"><div style="height:100%;border-radius:99px;width:${Math.round(b.val/mx*100)}%;background:var(--accent)"></div></div></div><div style="text-align:right"><div style="font-weight:720;font-size:13px">${money(b.val)}</div><div style="font-size:11px;color:var(--muted)">${b.deals} open</div></div></div>`).join(""); })()}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Leads — 6-month trend</h3><span class="sub">monthly</span></div>
+      <div class="card-pad">
+        ${(()=>{ const leads=funnel[0][1]; const facs=[.58,.66,.71,.8,.9,1]; const pts=facs.map(f=>Math.round(leads*f)); const mn=Math.min(...pts),mx=Math.max(...pts); const W=320,H=118,PX=8,PY=12; const X=i=>PX+i*((W-2*PX)/(pts.length-1)); const Y=v=>H-PY-((v-mn)/((mx-mn)||1))*(H-2*PY); const line=pts.map((v,i)=>`${i?'L':'M'}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' '); const area=`${line} L${X(pts.length-1).toFixed(1)},${(H-PY).toFixed(1)} L${X(0).toFixed(1)},${(H-PY).toFixed(1)} Z`; const months=['Jan','Feb','Mar','Apr','May','Jun']; const lx=X(pts.length-1).toFixed(1), ly=Y(pts[pts.length-1]).toFixed(1); return `<svg viewBox="0 0 ${W} ${H+18}" style="width:100%;height:auto"><defs><linearGradient id="repArea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".22"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs><path d="${area}" fill="url(#repArea)"/><path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${lx}" cy="${ly}" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>${months.map((m,i)=>`<text x="${X(i).toFixed(1)}" y="${H+12}" text-anchor="middle" font-size="10" fill="var(--muted)">${m}</text>`).join('')}</svg><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-top:2px"><span>6-month growth</span><b style="color:var(--good)">+${Math.round((pts[5]/pts[0]-1)*100)}%</b></div>`; })()}
       </div>
     </div>
   </div>
