@@ -249,6 +249,8 @@
   .review .rv-top{display:flex; align-items:center; gap:8px; margin-bottom:3px;} .review .rv-n{font-weight:640; font-size:13px;}
   .review .src{margin-left:auto; font-size:11px; color:var(--muted);} .review p{font-size:12.5px; color:var(--ink-2);}
   .review .rv-reply{margin-top:8px; font-size:11.5px; color:var(--ink-2); background:var(--surface-2); border-left:2px solid var(--accent); padding:8px 11px; border-radius:0 8px 8px 0;}
+  .rv-reply.fresh{animation:fade .3s ease;}
+  .rv-generating{margin-top:8px; font-size:11.5px; color:var(--muted); display:flex; align-items:center; gap:8px;}
 
   /* reporting */
   .don-wrap{display:flex; align-items:center; gap:20px; flex-wrap:wrap;}
@@ -876,7 +878,7 @@ VIEWS.reputation = () => {
     <div class="card">
       <div class="card-h"><h3>Recent reviews</h3><span class="link">Respond ▾</span></div>
       <div class="card-pad" style="padding-top:6px;">
-        ${reviews.map(([n,ai,rt,src,txt,reply])=>`<div class="review"><span class="rv-ava" style="background:${avaColor(ai)}">${n.split(" ").map(x=>x[0]).join("")}</span><div style="flex:1"><div class="rv-top"><span class="rv-n">${n}</span>${star(rt)}<span class="src">${src}</span></div><p>${esc(txt)}</p>${reply?`<div class="rv-reply"><b>${esc(CONFIG.clientName)} replied:</b> ${esc(reply)}</div>`:`<button class="btn btn-ghost" style="margin-top:8px;padding:5px 11px;font-size:12px;">Reply with AI ✨</button>`}</div></div>`).join("")}
+        ${reviews.map(([n,ai,rt,src,txt,reply],idx)=>`<div class="review"><span class="rv-ava" style="background:${avaColor(ai)}">${n.split(" ").map(x=>x[0]).join("")}</span><div style="flex:1"><div class="rv-top"><span class="rv-n">${n}</span>${star(rt)}<span class="src">${src}</span></div><p>${esc(txt)}</p><div class="rv-slot">${reply?`<div class="rv-reply"><b>${esc(CONFIG.clientName)} replied:</b> ${esc(reply)}</div>`:`<button class="btn btn-ghost rv-ai" data-rev="${idx}" style="margin-top:8px;padding:5px 11px;font-size:12px;">Reply with AI ✨</button>`}</div></div></div>`).join("")}
       </div>
     </div>
   </div>`;
@@ -937,8 +939,23 @@ const AFTER = {
   contacts(){ $$(".crow").forEach(el=>{ const open=()=>openContact(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); open(); } }); }); },
   calendar(){ $$("[data-appt]").forEach(el=>{ const open=()=>openAppt(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); open(); } }); });
     $$("#calSeg .cal-seg").forEach(b=>b.addEventListener("click",()=>{ $$("#calSeg .cal-seg").forEach(x=>x.classList.remove("on")); b.classList.add("on"); const wk=b.dataset.cv==="week"; $("#calMonth").style.display=wk?"none":""; $("#calWeek").style.display=wk?"":"none"; })); },
-  sites(){ $$(".funnel-row").forEach(el=>{ const open=()=>openFunnel(+el.dataset.funnel); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); open(); } }); }); }
+  sites(){ $$(".funnel-row").forEach(el=>{ const open=()=>openFunnel(+el.dataset.funnel); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); open(); } }); }); },
+  reputation(){ $$(".rv-ai").forEach(btn=>btn.addEventListener("click",()=>aiReply(btn))); }
 };
+const AI_REVIEW_REPLIES=[
+  "Thank you so much for the kind words — it truly means the world to our team! We can't wait to see you again. 💜",
+  "We really appreciate you taking the time to share this! Reviews like yours help our small business more than you know. 🙌",
+  "Thank you! We're so glad you had a great experience — see you at your next visit! ✨",
+  "This absolutely made our day — thank you for the wonderful review and for trusting us with your care!"
+];
+function aiReply(btn){
+  const slot=btn.closest(".rv-slot"); if(!slot) return;
+  slot.innerHTML=`<div class="rv-generating"><span class="typedots"><i></i><i></i><i></i></span> Generating reply…</div>`;
+  setTimeout(()=>{
+    const r=AI_REVIEW_REPLIES[Math.floor(Math.random()*AI_REVIEW_REPLIES.length)];
+    slot.innerHTML=`<div class="rv-reply fresh"><b>${esc(CONFIG.clientName)} replied:</b> ${esc(r)}</div>`;
+  },1100);
+}
 
 /* ============ Opportunity detail drawer ============ */
 function openOpp(d){
