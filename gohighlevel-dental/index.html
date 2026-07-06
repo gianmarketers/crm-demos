@@ -64,8 +64,23 @@
   .topbar{display:flex; align-items:center; gap:14px; padding:13px 24px; background:var(--surface); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:20;}
   .page-title{font-size:18px; font-weight:680;}
   .page-sub{font-size:12.5px; color:var(--muted);}
-  .search{margin-left:auto; display:flex; align-items:center; gap:8px; background:var(--surface-2); border:1px solid var(--line); border-radius:9px; padding:8px 12px; width:240px; color:var(--muted); font-size:13px;}
+  .search-wrap{margin-left:auto; position:relative;}
+  .search{display:flex; align-items:center; gap:8px; background:var(--surface-2); border:1px solid var(--line); border-radius:9px; padding:8px 12px; width:240px; color:var(--muted); font-size:13px; transition:border-color .15s, box-shadow .15s;}
+  .search:focus-within{border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent); background:var(--surface);}
   .search svg{width:15px; height:15px; flex:none;}
+  .search input{border:none; background:none; outline:none; flex:1; min-width:0; color:var(--ink); font-size:13px; font-family:inherit;}
+  .search input::placeholder{color:var(--muted);}
+  .search-results{position:absolute; top:calc(100% + 8px); right:0; width:340px; max-height:60vh; overflow-y:auto; background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow-lg); z-index:60; padding:6px;}
+  .search-results[hidden]{display:none;}
+  .sr-head{font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); padding:8px 10px 4px;}
+  .sr-item{display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:9px; cursor:pointer; text-align:left; width:100%; border:none; background:none; font-family:inherit;}
+  .sr-item:hover, .sr-item.sel{background:var(--surface-2);}
+  .sr-ava{width:32px; height:32px; border-radius:8px; flex:none; display:grid; place-items:center; font-weight:700; font-size:12px; color:#fff; background:linear-gradient(135deg,var(--brand),var(--brand-2));}
+  .sr-main{flex:1; min-width:0;}
+  .sr-name{font-size:13.5px; font-weight:620; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .sr-sub{font-size:11.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .sr-type{font-size:10px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; color:var(--accent); background:var(--accent-soft); padding:3px 8px; border-radius:99px; flex:none;}
+  .sr-empty{padding:20px 12px; text-align:center; color:var(--muted); font-size:13px;}
   .tb-btn{width:38px; height:38px; border-radius:9px; border:1px solid var(--line); background:var(--surface); display:grid; place-items:center; position:relative;}
   .tb-btn:hover{background:var(--surface-2);}
   .tb-btn svg{width:17px; height:17px; stroke:var(--ink-2);}
@@ -287,7 +302,7 @@
     .side.open{transform:none;}
     .scrim.on{display:block;}
     .menu-btn{display:grid!important;}
-    .search{display:none;}
+    .search-wrap{display:none;}
   }
   .menu-btn{display:none; width:38px; height:38px; border-radius:9px; border:1px solid var(--line); background:var(--surface); place-items:center;}
   .menu-btn svg{width:18px; height:18px; stroke:var(--ink-2);}
@@ -319,7 +334,10 @@
         <div class="page-title" id="pageTitle">Dashboard</div>
         <div class="page-sub" id="pageSub">Welcome back — here's how Bright Smile is doing this month.</div>
       </div>
-      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4" stroke-linecap="round"/></svg> Search contacts, convos…</div>
+      <div class="search-wrap">
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4" stroke-linecap="round"/></svg><input id="searchInput" type="text" placeholder="Search contacts, deals…" autocomplete="off" aria-label="Search"></div>
+        <div class="search-results" id="searchResults" hidden></div>
+      </div>
       <span class="demochip">Interactive demo</span>
       <button class="tb-btn" id="tourBtn" title="Guided tour" aria-label="Guided tour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9a3 3 0 0 1 5.6 1c0 2-3 2.5-3 4"/><circle cx="12" cy="17.4" r=".6" fill="currentColor"/></svg></button>
       <button class="tb-btn" id="themeBtn" title="Theme" aria-label="Theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg></button>
@@ -955,6 +973,30 @@ function toggleNotif(force){ const p=$("#notifPanel"); if(!p) return; const open
 $("#notifBtn").addEventListener("click",e=>{ e.stopPropagation(); toggleNotif(); });
 document.addEventListener("click",e=>{ const p=$("#notifPanel"); if(p && !p.hasAttribute("hidden") && !p.contains(e.target) && !$("#notifBtn").contains(e.target)) toggleNotif(false); });
 
+/* ============ Global search ============ */
+const SEARCH=[];
+Object.entries(OPPS).forEach(([st,items])=>items.forEach(([n,s,v,ri])=>
+  SEARCH.push({n, sub:String(s), type:"Deal", go:"pipeline", opp:{n, s:String(s), v:String(v), st, ri:String(ri)}})));
+CONVOS.forEach(c=>SEARCH.push({n:c.n, sub:"Conversation · "+CH_LABEL[c.ch], type:"Inbox", go:"conversations"}));
+function hideSearch(){ const b=$("#searchResults"); if(b){ b.setAttribute("hidden",""); b.innerHTML=""; } }
+function chooseSearch(x){ hideSearch(); const si=$("#searchInput"); si.value=""; si.blur(); go(x.go); if(x.opp) openOpp(x.opp); }
+function runSearch(q){
+  const box=$("#searchResults"); if(!box) return;
+  q=(q||"").trim().toLowerCase();
+  if(!q){ hideSearch(); return; }
+  const hits=SEARCH.filter(x=>x.n.toLowerCase().includes(q)||x.sub.toLowerCase().includes(q)).slice(0,8);
+  if(!hits.length){ box.innerHTML=`<div class="sr-empty">No matches for “${esc(q)}”</div>`; box.removeAttribute("hidden"); return; }
+  box.innerHTML=`<div class="sr-head">${hits.length} result${hits.length>1?"s":""}</div>`+hits.map((x,i)=>{
+    const initials=x.n.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+    return `<button class="sr-item" data-i="${i}"><span class="sr-ava">${initials}</span><div class="sr-main"><div class="sr-name">${esc(x.n)}</div><div class="sr-sub">${esc(x.sub)}</div></div><span class="sr-type">${esc(x.type)}</span></button>`;
+  }).join("");
+  $$("#searchResults .sr-item").forEach((el,i)=>el.addEventListener("click",()=>chooseSearch(hits[i])));
+  box.removeAttribute("hidden");
+}
+$("#searchInput").addEventListener("input",e=>runSearch(e.target.value));
+$("#searchInput").addEventListener("focus",e=>{ if(e.target.value.trim()) runSearch(e.target.value); });
+document.addEventListener("click",e=>{ const w=$(".search-wrap"); if(w && !w.contains(e.target)) hideSearch(); });
+
 /* apply CONFIG */
 $("#acctName").textContent=CONFIG.clientName; $("#acctLogo").textContent=CONFIG.clientInitial; $("#acctSub").textContent=CONFIG.clientType+" · Sub-account";
 $("#agencyName").textContent=CONFIG.agencyName; $("#agencyAva").textContent=(CONFIG.agencyName.trim()[0]||"A").toUpperCase();
@@ -990,7 +1032,7 @@ function showTour(){
     $("#tn").addEventListener("click",()=>{ti++;showTour();}); $("#tp").addEventListener("click",()=>{ti--;showTour();}); $("#tx").addEventListener("click",endTour);
   }));
 }
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ endTour(); closeDrawer(); toggleNotif(false); } });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ endTour(); closeDrawer(); toggleNotif(false); hideSearch(); } });
 
 /* boot */
 renderNav(); go("dashboard");
