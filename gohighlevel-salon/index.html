@@ -180,6 +180,20 @@
   .cal .dn{font-weight:640; color:var(--ink-2); margin-bottom:4px;} .cal .day.today .dn{color:#fff; background:var(--accent); width:20px; height:20px; border-radius:50%; display:grid; place-items:center;}
   .appt{font-size:10px; font-weight:600; padding:2px 5px; border-radius:5px; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .appt.botox{background:rgba(79,86,199,.15); color:#5b6bd6;} .appt.facial{background:var(--brand-soft); color:var(--brand-2);} .appt.laser{background:var(--good-bg); color:var(--good);} .appt.consult{background:var(--warn-bg); color:var(--warn);}
+  .appt[data-appt]{cursor:pointer;} .appt[data-appt]:hover{box-shadow:inset 0 0 0 1.5px currentColor;} .appt[data-appt]:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+  /* month/week segmented toggle + week agenda */
+  .cal-seg-wrap{display:flex; gap:2px; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:2px; margin-left:auto;}
+  .cal-seg{font-size:12px; font-weight:600; padding:5px 12px; border-radius:6px; border:none; background:none; color:var(--muted); cursor:pointer; font-family:inherit;}
+  .cal-seg.on{background:var(--surface); color:var(--ink); box-shadow:var(--shadow);}
+  .calweek-wrap{overflow-x:auto;}
+  .calweek{display:grid; grid-template-columns:repeat(7,1fr); gap:8px; min-width:660px;}
+  .cw-col{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:8px 7px; min-height:230px;}
+  .cw-col.today{border-color:var(--accent); background:var(--accent-soft);}
+  .cw-dow{font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); text-align:center;}
+  .cw-dn{font-size:16px; font-weight:750; text-align:center; margin:2px 0 8px; color:var(--ink-2);}
+  .cw-col.today .cw-dn{color:var(--accent);}
+  .cw-col .appt{white-space:normal; padding:5px 7px; font-size:10.5px; margin-bottom:5px; line-height:1.3;}
+  .cw-empty{font-size:11px; color:var(--muted); text-align:center; margin-top:14px;}
   .up-appt{display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--line);} .up-appt:last-child{border:none;}
   .up-time{text-align:center; flex:none; width:58px;} .up-time b{font-size:14px; display:block;} .up-time span{font-size:10.5px; color:var(--muted);}
   .up-bar{width:3px; align-self:stretch; border-radius:99px;}
@@ -589,19 +603,29 @@ VIEWS.calendar = () => {
   const appts={4:[["botox","10a Balayage — Amber"]],5:[["consult","11a Cut+gloss — Sara"],["facial","6p Fade — Andre"]],9:[["laser","10a Bridal trial — Dee"]],11:[["botox","9a Color club — Jade"],["consult","2p Highlights — Tessa"]],12:[["facial","1p Blowout — Nia"]],16:[["botox","10a Color correction — Mia"]],17:[["consult","9a Cuts (x4)"],["facial","3p Beard sculpt — Omar"]],18:[["laser","11a Bridal party (3)"]],19:[["botox","5p Fades (x3)"]],24:[["facial","1p Membership blowouts"]],25:[["botox","10a Balayage"]]};
   const today=11; let cells="";
   const startPad=2; // month starts Wed
+  const apptAttr=(t,l)=>{ const p=l.split(" "); const when=p[0]; const title=p.slice(1).join(" ")||l; return `data-appt data-ty="${t}" data-t="${esc(when)}" data-ti="${esc(title)}" data-su="Scheduled" tabindex="0" role="button"`; };
   for(let i=0;i<startPad;i++) cells+=`<div class="day out"><div class="dn">${28+i}</div></div>`;
   for(let d=1; d<=30; d++){
     const a=appts[d]||[];
-    cells+=`<div class="day ${d===today?"today":""}"><div class="dn">${d}</div>${a.map(([t,l])=>`<div class="appt ${t}">${esc(l)}</div>`).join("")}</div>`;
+    cells+=`<div class="day ${d===today?"today":""}"><div class="dn">${d}</div>${a.map(([t,l])=>`<div class="appt ${t}" ${apptAttr(t,l)}>${esc(l)}</div>`).join("")}</div>`;
+  }
+  // week agenda: the Sun–Sat week containing today
+  const DOWL=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const weekSun=today-((startPad+today-1)%7); let weekCells="";
+  for(let k=0;k<7;k++){ const d=weekSun+k; const valid=d>=1&&d<=30; const a=valid?(appts[d]||[]):[];
+    weekCells+=`<div class="cw-col ${d===today?"today":""}"><div class="cw-dow">${DOWL[k]}</div><div class="cw-dn">${valid?d:""}</div>${a.map(([t,l])=>`<div class="appt ${t}" ${apptAttr(t,l)}>${esc(l)}</div>`).join("")||(valid?'<div class="cw-empty">No appointments</div>':"")}</div>`;
   }
   const upcoming=[["10:00","AM","botox","Balayage — Amber J.","New guest 20% · Lena"],["11:30","AM","consult","Color consult — Mia F.","Correction · Rosa"],["1:30","PM","facial","Blowout — Nia K.","Member · Tia"],["6:00","PM","botox","Fade + beard — Nick P.","Hot towel · Kai"]];
   const upC={botox:"var(--accent)",consult:"var(--warn)",facial:"var(--brand)",laser:"var(--good)"};
   return `
   <div class="grid2">
     <div class="card">
-      <div class="card-h"><h3>June 2026</h3><span class="link">Today ▾</span></div>
+      <div class="card-h"><h3>June 2026</h3>
+        <div class="cal-seg-wrap" id="calSeg"><button class="cal-seg on" data-cv="month">Month</button><button class="cal-seg" data-cv="week">Week</button></div>
+      </div>
       <div class="card-pad">
-        <div class="cal">${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>`<div class="dow">${d}</div>`).join("")}${cells}</div>
+        <div class="cal" id="calMonth">${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>`<div class="dow">${d}</div>`).join("")}${cells}</div>
+        <div class="calweek-wrap" id="calWeek" style="display:none"><div class="calweek">${weekCells}</div></div>
       </div>
     </div>
     <div class="card">
@@ -854,7 +878,8 @@ const AFTER = {
   automation(){ $$("#wfTabs .wf-tab").forEach(t=>t.addEventListener("click",()=>renderWF(+t.dataset.wf))); renderWF(0); },
   pipeline(){ $$("[data-op]").forEach(el=>{ const open=()=>openOpp(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); open(); } }); }); },
   contacts(){ $$(".crow").forEach(el=>{ const open=()=>openContact(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); open(); } }); }); },
-  calendar(){ $$("[data-appt]").forEach(el=>{ const open=()=>openAppt(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); open(); } }); }); },
+  calendar(){ $$("[data-appt]").forEach(el=>{ const open=()=>openAppt(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); open(); } }); });
+    $$("#calSeg .cal-seg").forEach(b=>b.addEventListener("click",()=>{ $$("#calSeg .cal-seg").forEach(x=>x.classList.remove("on")); b.classList.add("on"); const wk=b.dataset.cv==="week"; $("#calMonth").style.display=wk?"none":""; $("#calWeek").style.display=wk?"":"none"; })); },
   sites(){ $$(".funnel-row").forEach(el=>{ const open=()=>openFunnel(+el.dataset.funnel); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); open(); } }); }); }
 };
 
