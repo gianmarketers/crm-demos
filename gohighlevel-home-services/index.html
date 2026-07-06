@@ -126,8 +126,10 @@
   .legend i{width:10px; height:10px; border-radius:3px; display:inline-block; margin-right:6px; vertical-align:middle;}
 
   /* activity feed */
-  .feed{display:grid;} .feed-row{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line);}
+  .feed{display:grid;} .feed-row{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); width:100%; text-align:left; background:none; border-left:none; border-right:none; border-top:none; color:inherit; font-family:inherit;}
   .feed-row:last-child{border-bottom:none;}
+  .feed-row[data-fgo]{cursor:pointer; border-radius:8px; margin:0 -8px; padding-left:8px; padding-right:8px; transition:background .1s;}
+  .feed-row[data-fgo]:hover{background:var(--surface-2);} .feed-row[data-fgo]:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
   .feed-ic{width:30px; height:30px; border-radius:8px; flex:none; display:grid; place-items:center;} .feed-ic svg{width:15px; height:15px;}
   .feed b{font-weight:640;} .feed .ft{font-size:13px; color:var(--ink-2);} .feed .fm{font-size:11.5px; color:var(--muted); margin-top:1px;}
 
@@ -487,6 +489,9 @@ const CH_LABEL = {sms:"SMS", email:"Email", ig:"Instagram"};
 /* ================= VIEWS ================= */
 const VIEWS = {};
 
+/* activity-feed rows route by event icon (shared across every niche) */
+const FEED_GO = {ig:"conversations",sms:"conversations",email:"conversations",phone:"conversations",check:"reporting",star:"reputation",cal:"calendar",bolt:"automation"};
+
 VIEWS.dashboard = () => {
   const kpis = [
     ["ib",'<path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 12l5-3"/>',"New leads","206","up","+18% vs last mo"],
@@ -531,7 +536,7 @@ VIEWS.dashboard = () => {
       <div class="card-h"><h3>Recent activity</h3></div>
       <div class="card-pad" style="padding-top:4px;">
         <div class="feed">
-          ${feed.map(([tone,ic,txt,meta])=>`<div class="feed-row"><span class="feed-ic ${fBg[tone]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${fIc[ic]}</svg></span><div><div class="ft">${txt}</div><div class="fm">${meta}</div></div></div>`).join("")}
+          ${feed.map(([tone,ic,txt,meta])=>`<button class="feed-row"${FEED_GO[ic]?` data-fgo="${FEED_GO[ic]}"`:""}><span class="feed-ic ${fBg[tone]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${fIc[ic]}</svg></span><div><div class="ft">${txt}</div><div class="fm">${meta}</div></div></button>`).join("")}
         </div>
       </div>
     </div>
@@ -873,7 +878,7 @@ VIEWS.reporting = () => {
 
 /* ============ AFTER-render hooks ============ */
 const AFTER = {
-  dashboard(){ requestAnimationFrame(()=>$$("#dashBars .bar").forEach(b=>b.style.height=b.dataset.h+"%")); },
+  dashboard(){ requestAnimationFrame(()=>$$("#dashBars .bar").forEach(b=>b.style.height=b.dataset.h+"%")); $$(".feed-row[data-fgo]").forEach(el=>el.addEventListener("click",()=>go(el.dataset.fgo))); },
   conversations(){ $$("#convList .conv-item").forEach(el=>el.addEventListener("click",()=>renderThread(+el.dataset.c))); $$("#convFilter .cf-chip").forEach(ch=>ch.addEventListener("click",()=>{ $$("#convFilter .cf-chip").forEach(x=>x.classList.remove("on")); ch.classList.add("on"); const f=ch.dataset.f; $$("#convList .conv-item").forEach(el=>{ const show=f==="all"||(f==="unread"?el.dataset.unread==="1":el.dataset.ch===f); el.style.display=show?"":"none"; }); })); renderThread(0); },
   automation(){ $$("#wfTabs .wf-tab").forEach(t=>t.addEventListener("click",()=>renderWF(+t.dataset.wf))); renderWF(0); },
   pipeline(){ $$("[data-op]").forEach(el=>{ const open=()=>openOpp(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); open(); } }); }); },
