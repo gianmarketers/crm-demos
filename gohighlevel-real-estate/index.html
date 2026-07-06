@@ -269,6 +269,14 @@
   .dw-act:hover{background:var(--surface-2); color:var(--ink); border-color:var(--accent);}
   .dw-act svg{width:17px; height:17px;}
   @media(max-width:520px){ .dw-actions{grid-template-columns:repeat(2,1fr);} }
+  /* clickable funnel rows + in-drawer conversion mini-funnel */
+  .funnel-row{display:flex; align-items:center; gap:12px; width:100%; padding:12px 6px; border:none; border-bottom:1px solid var(--line); background:none; text-align:left; font-family:inherit; cursor:pointer; transition:background .12s; border-radius:6px;}
+  .funnel-row:hover{background:var(--surface-2);}
+  .funnel-row:last-child{border-bottom:none;}
+  .fn-steps{display:grid; gap:12px; margin:2px 0 6px;}
+  .fn-lab{display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:5px;} .fn-lab b{font-weight:700;}
+  .fn-track{height:9px; border-radius:99px; background:var(--surface-2); overflow:hidden;}
+  .fn-bar{height:100%; border-radius:99px;}
 
   /* inbox filter + clickable contact rows */
   .conv-filter{display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;}
@@ -728,8 +736,10 @@ function openNode(d,w){
   $("#dwX").addEventListener("click",closeDrawer);
 }
 
+let CUR_FUNNELS=[];
 VIEWS.sites = () => {
   const funnels=[["Home Valuation Funnel","Landing → CMA request","2,240 views · 22% opt-in","live"],["Buyer Pre-Approval Funnel","Quiz → Lender → Consult","1,120 views · 26% opt-in","live"],["New Listing Alerts Sign-up","IDX → Saved search","760 views · 33% opt-in","live"],["Open House Registration","Landing → RSVP","Ended · 14% conv","paused"]];
+  CUR_FUNNELS=funnels;
   return `
   <div class="grid2b">
     <div class="card">
@@ -754,7 +764,7 @@ VIEWS.sites = () => {
     <div class="card">
       <div class="card-h"><h3>Funnels &amp; sites</h3><span class="link">+ New funnel</span></div>
       <div class="card-pad" style="padding-top:8px;">
-        ${funnels.map(([n,s,st,state])=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)"><span class="ki ${state==="live"?"ig":"iw"}" style="width:34px;height:34px;border-radius:9px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg></span><div style="flex:1"><div style="font-weight:640;font-size:13.5px">${n}</div><div style="font-size:11.5px;color:var(--muted)">${s} · ${st}</div></div><span class="tag" style="background:${state==="live"?"var(--good-bg)":"var(--warn-bg)"};color:${state==="live"?"var(--good)":"var(--warn)"}">${state}</span></div>`).join("")}
+        ${funnels.map(([n,s,st,state],i)=>`<button class="funnel-row" data-funnel="${i}"><span class="ki ${state==="live"?"ig":"iw"}" style="width:34px;height:34px;border-radius:9px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg></span><div style="flex:1"><div style="font-weight:640;font-size:13.5px">${n}</div><div style="font-size:11.5px;color:var(--muted)">${s} · ${st}</div></div><span class="tag" style="background:${state==="live"?"var(--good-bg)":"var(--warn-bg)"};color:${state==="live"?"var(--good)":"var(--warn)"}">${state}</span></button>`).join("")}
       </div>
     </div>
   </div>`;
@@ -847,7 +857,8 @@ const AFTER = {
   automation(){ $$("#wfTabs .wf-tab").forEach(t=>t.addEventListener("click",()=>renderWF(+t.dataset.wf))); renderWF(0); },
   pipeline(){ $$("[data-op]").forEach(el=>{ const open=()=>openOpp(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); open(); } }); }); },
   contacts(){ $$(".crow").forEach(el=>{ const open=()=>openContact(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); open(); } }); }); },
-  calendar(){ $$("[data-appt]").forEach(el=>{ const open=()=>openAppt(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); open(); } }); }); }
+  calendar(){ $$("[data-appt]").forEach(el=>{ const open=()=>openAppt(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); open(); } }); }); },
+  sites(){ $$(".funnel-row").forEach(el=>{ const open=()=>openFunnel(+el.dataset.funnel); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); open(); } }); }); }
 };
 
 /* ============ Opportunity detail drawer ============ */
@@ -949,6 +960,41 @@ function openContact(d){
       </div>
       <div class="dw-sec">Next step</div>
       <div class="dw-next"><span style="color:var(--accent);font-weight:800;">➤</span><div class="nt"><b>Automated</b>Enrolled in recall / rebook sequence</div></div>
+    </div>
+    ${dwActionsHTML()}`;
+  $("#drawer").classList.add("on"); $("#drawerScrim").classList.add("on"); $("#drawer").setAttribute("aria-hidden","false");
+  $("#dwX").addEventListener("click",closeDrawer);
+}
+
+/* ============ Funnel detail drawer ============ */
+function openFunnel(i){
+  const f=CUR_FUNNELS[i]; if(!f) return;
+  const [name,flow,stat,state]=f; const live=state==="live";
+  const vm=stat.match(/([\d,]+)\s*views/); const pm=stat.match(/(\d+)%/);
+  const views=vm?+vm[1].replace(/,/g,""):0; const pct=pm?+pm[1]:0;
+  const optins=Math.round(views*pct/100); const booked=Math.round(optins*0.58); const won=Math.round(booked*0.46);
+  const steps=views?[["Visitors",views,"var(--brand)"],["Opt-ins",optins,"var(--accent)"],["Booked",booked,"var(--warn)"],["New clients",won,"var(--good)"]]:[];
+  const maxS=steps.length?steps[0][1]:1;
+  $("#drawer").innerHTML=`
+    <div class="dw-top">
+      <div class="dw-row1">
+        <span class="dw-ava" style="background:linear-gradient(135deg,var(--brand),var(--brand-2))"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg></span>
+        <div><div class="dw-name">${esc(name)}</div><div class="dw-svc">${esc(flow)}</div></div>
+        <button class="dw-x" id="dwX" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="dw-chips"><span class="dw-chip" style="color:${live?'var(--good)':'var(--warn)'}">● ${live?'Live':'Paused'}</span>${pct?`<span class="dw-chip">${pct}% opt-in</span>`:''}</div>
+    </div>
+    <div class="dw-body">
+      <div class="dw-sec">Conversion this month</div>
+      ${steps.length?`<div class="fn-steps">${steps.map(([l,v,c])=>`<div><div class="fn-lab"><span>${l}</span><b>${v.toLocaleString()}</b></div><div class="fn-track"><div class="fn-bar" style="width:${Math.max(4,Math.round(v/maxS*100))}%;background:${c}"></div></div></div>`).join("")}</div>`:`<p style="font-size:12.5px;color:var(--ink-2)">This funnel is paused. Last run: ${esc(stat)}.</p>`}
+      <div class="dw-sec">Details</div>
+      <div class="dw-field"><span>Flow</span><b>${esc(flow)}</b></div>
+      <div class="dw-field"><span>Status</span><b>${live?'Live':'Paused'}</b></div>
+      ${views?`<div class="dw-field"><span>Traffic</span><b>${views.toLocaleString()} views/mo</b></div>`:''}
+      ${pct?`<div class="dw-field"><span>Opt-in rate</span><b>${pct}%</b></div>`:''}
+      ${won?`<div class="dw-field"><span>Est. new clients</span><b>${won}/mo</b></div>`:''}
+      <div class="dw-sec">Next step</div>
+      <div class="dw-next"><span style="color:var(--accent);font-weight:800;">➤</span><div class="nt"><b>Automated</b>Every opt-in enters the nurture workflow and books straight onto the calendar</div></div>
     </div>
     ${dwActionsHTML()}`;
   $("#drawer").classList.add("on"); $("#drawerScrim").classList.add("on"); $("#drawer").setAttribute("aria-hidden","false");
