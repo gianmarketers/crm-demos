@@ -13,7 +13,7 @@
     --ink:#141726; --ink-2:#5b6178; --muted:#9096ac;
     --line:#e6e8f0; --hairline:rgba(20,23,38,.08);
     --brand:#b4883a; --brand-2:#8c6626; --brand-soft:#f3ead4;
-    --accent:#3d63f0; --accent-deep:#2846c4; --accent-soft:#e3e9fe;
+    --accent:var(--brand-2); --accent-deep:color-mix(in srgb,var(--brand-2) 78%, #000); --accent-soft:var(--brand-soft);
     --good:#12b76a; --good-bg:#e7f8f0; --warn:#f79009; --warn-bg:#fef3e2; --danger:#f04438; --danger-bg:#fde8e6;
     --star:#f5a623;
     --shadow:0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.07);
@@ -24,7 +24,7 @@
     --bg:#0c0f1a; --surface:#141827; --surface-2:#1a1f31; --surface-3:#222840;
     --ink:#eef0f7; --ink-2:#a6adc6; --muted:#79809a;
     --line:#252b40; --hairline:rgba(255,255,255,.08);
-    --accent:#5c7cf5; --accent-deep:#8aa2f8; --accent-soft:#20294a;
+    --accent:var(--brand-2); --accent-deep:var(--brand); --accent-soft:var(--brand-soft);
     --good:#3ddc97; --good-bg:#12321f; --warn:#f9b24b; --warn-bg:#3a2a12; --danger:#ff6b60; --danger-bg:#3a1c1a;
     --brand-soft:#2a2210;
     --shadow:0 1px 2px rgba(0,0,0,.4); --shadow-lg:0 16px 44px rgba(0,0,0,.55);
@@ -164,7 +164,7 @@
   .cal .day.out{background:var(--surface-2); color:var(--muted);}
   .cal .dn{font-weight:640; color:var(--ink-2); margin-bottom:4px;} .cal .day.today .dn{color:#fff; background:var(--accent); width:20px; height:20px; border-radius:50%; display:grid; place-items:center;}
   .appt{font-size:10px; font-weight:600; padding:2px 5px; border-radius:5px; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .appt.botox{background:var(--accent-soft); color:var(--accent);} .appt.facial{background:var(--brand-soft); color:var(--brand-2);} .appt.laser{background:var(--good-bg); color:var(--good);} .appt.consult{background:var(--warn-bg); color:var(--warn);}
+  .appt.botox{background:rgba(79,86,199,.15); color:#5b6bd6;} .appt.facial{background:var(--brand-soft); color:var(--brand-2);} .appt.laser{background:var(--good-bg); color:var(--good);} .appt.consult{background:var(--warn-bg); color:var(--warn);}
   .up-appt{display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--line);} .up-appt:last-child{border:none;}
   .up-time{text-align:center; flex:none; width:58px;} .up-time b{font-size:14px; display:block;} .up-time span{font-size:10.5px; color:var(--muted);}
   .up-bar{width:3px; align-self:stretch; border-radius:99px;}
@@ -221,6 +221,40 @@
   .tour-nav{display:flex; gap:8px; align-items:center;} .tour-nav .btn{padding:7px 13px;}
   .tour-close{margin-left:auto; color:var(--muted); font-size:13px; font-weight:600;} .tour-close:hover{color:var(--ink);}
 
+  /* opportunity drawer */
+  .op[data-op]{cursor:pointer; transition:transform .12s, box-shadow .12s, border-color .12s;}
+  .op[data-op]:hover{border-color:var(--accent); box-shadow:var(--shadow-lg); transform:translateY(-1px);}
+  .op[data-op]:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .drawer-scrim{position:fixed; inset:0; background:rgba(8,10,20,.44); z-index:130; opacity:0; pointer-events:none; transition:opacity .2s;}
+  .drawer-scrim.on{opacity:1; pointer-events:auto;}
+  .drawer{position:fixed; top:0; right:0; height:100vh; width:400px; max-width:92vw; background:var(--surface); border-left:1px solid var(--line); box-shadow:-20px 0 50px rgba(8,10,20,.22); z-index:131; transform:translateX(100%); transition:transform .26s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; overflow:hidden;}
+  .drawer.on{transform:none;}
+  .dw-top{padding:16px 18px; border-bottom:1px solid var(--line); background:linear-gradient(180deg,var(--accent-soft),transparent);}
+  .dw-row1{display:flex; align-items:center; gap:12px;}
+  .dw-ava{width:44px; height:44px; border-radius:50%; flex:none; display:grid; place-items:center; color:#fff; font-weight:700; font-size:16px;}
+  .dw-name{font-size:16px; font-weight:700;} .dw-svc{font-size:12.5px; color:var(--ink-2);}
+  .dw-x{margin-left:auto; width:30px; height:30px; border-radius:8px; display:grid; place-items:center; color:var(--muted);} .dw-x:hover{background:var(--surface-2); color:var(--ink);}
+  .dw-chips{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .dw-chip{font-size:11.5px; font-weight:650; padding:4px 10px; border-radius:99px; background:var(--surface); border:1px solid var(--line);}
+  .dw-val{font-size:22px; font-weight:760; letter-spacing:-.02em;}
+  .dw-body{flex:1; overflow-y:auto; padding:16px 18px;}
+  .dw-sec{font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:14px 0 10px;} .dw-body>.dw-sec:first-child{margin-top:0;}
+  .dw-field{display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid var(--line); font-size:13px;}
+  .dw-field span{color:var(--muted);} .dw-field b{font-weight:640; text-align:right;}
+  .dw-tl{display:grid; gap:0; position:relative; margin-left:4px;}
+  .dw-ev{display:flex; gap:12px; padding-bottom:14px; position:relative;}
+  .dw-ev:last-child{padding-bottom:0;}
+  .dw-dot{width:12px; height:12px; border-radius:50%; flex:none; margin-top:2px; z-index:1; border:2px solid var(--surface);}
+  .dw-ev:not(:last-child)::before{content:""; position:absolute; left:5px; top:14px; bottom:-2px; width:2px; background:var(--line);}
+  .dw-et{font-size:13px; font-weight:600;} .dw-em{font-size:11.5px; color:var(--muted);}
+  .dw-next{background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 25%,transparent); border-radius:10px; padding:12px 14px; display:flex; gap:10px; align-items:flex-start;}
+  .dw-next .nt{font-size:12.5px;} .dw-next b{display:block; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--accent); margin-bottom:2px;}
+  .dw-actions{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:14px 18px; border-top:1px solid var(--line);}
+  .dw-act{display:flex; flex-direction:column; align-items:center; gap:5px; padding:9px 0; border:1px solid var(--line); border-radius:9px; font-size:11px; font-weight:600; color:var(--ink-2); background:var(--surface);}
+  .dw-act:hover{background:var(--surface-2); color:var(--ink); border-color:var(--accent);}
+  .dw-act svg{width:17px; height:17px;}
+  @media(max-width:520px){ .dw-actions{grid-template-columns:repeat(2,1fr);} }
+
   .mobile-note{display:none;}
   @media(max-width:720px){
     .app{grid-template-columns:1fr;}
@@ -268,6 +302,8 @@
     </div>
     <div class="content" id="content"></div>
   </div>
+  <div class="drawer-scrim" id="drawerScrim"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true"></aside>
 </div>
 
 <script>
@@ -329,7 +365,7 @@ function go(id){
   current=id; renderNav();
   const [t,s]=PAGE_META[id]; $("#pageTitle").textContent=t; $("#pageSub").textContent=s;
   const c=$("#content"); c.innerHTML=`<div class="view on">${VIEWS[id]()}</div>`;
-  if(AFTER[id]) AFTER[id]();
+  closeDrawer(); if(AFTER[id]) AFTER[id]();
   $("#content").scrollTop=0; window.scrollTo({top:0});
 }
 
@@ -446,7 +482,7 @@ VIEWS.pipeline = () => {
       return `<div class="col"><div class="col-band" style="background:${STAGE_BAND[st]}"></div>
         <div class="col-h"><span class="cn">${st}</span><span class="cc">${items.length}</span><span class="cv">${money(val)}</span></div>
         <div class="col-body">
-          ${items.map(([n,s,v,ri])=>`<div class="op"><div class="on">${esc(n)}</div><div class="os">${esc(s)}</div>
+          ${items.map(([n,s,v,ri])=>`<div class="op" tabindex="0" role="button" data-op data-n="${esc(n)}" data-s="${esc(s)}" data-v="${v}" data-st="${esc(st)}" data-ri="${ri}"><div class="on">${esc(n)}</div><div class="os">${esc(s)}</div>
             <div class="op-foot"><span class="op-val">${money(v)}</span>
             <span class="tag" style="background:${STAGE_BAND[st]}22; color:${STAGE_BAND[st]}">${st==="Signed"?"Signed":"Open"}</span>
             <span class="op-ava" style="background:${avaColor(ri)}" title="${REPS[ri][1]}">${REPS[ri][0]}</span></div></div>`).join("")}
@@ -703,8 +739,56 @@ VIEWS.reporting = () => {
 const AFTER = {
   dashboard(){ requestAnimationFrame(()=>$$("#dashBars .bar").forEach(b=>b.style.height=b.dataset.h+"%")); },
   conversations(){ $$("#convList .conv-item").forEach(el=>el.addEventListener("click",()=>renderThread(+el.dataset.c))); renderThread(0); },
-  automation(){ $$("#wfTabs .wf-tab").forEach(t=>t.addEventListener("click",()=>renderWF(+t.dataset.wf))); renderWF(0); }
+  automation(){ $$("#wfTabs .wf-tab").forEach(t=>t.addEventListener("click",()=>renderWF(+t.dataset.wf))); renderWF(0); },
+  pipeline(){ $$("[data-op]").forEach(el=>{ const open=()=>openOpp(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); open(); } }); }); },
+  contacts(){ /* rows are static in this demo */ }
 };
+
+/* ============ Opportunity detail drawer ============ */
+function openOpp(d){
+  const stages=Object.keys(OPPS); const si=stages.indexOf(d.st); const ri=+d.ri;
+  const source=["Website form","Instagram DM","Google ad","Referral","Facebook ad"][ri%5];
+  const initials=d.n.split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();
+  const ev=[["Lead created","3 days ago","var(--muted)"],["First contact — SMS sent","3 days ago","var(--accent)"],["Reply received","2 days ago","var(--good)"]];
+  for(let i=1;i<=si;i++){ ev.push([`Moved to “${stages[i]}”`, (si-i)===0?"just now":`${si-i} day${si-i>1?"s":""} ago`, STAGE_BAND[stages[i]]||"var(--accent)"]); }
+  const last = si>=stages.length-1;
+  const next = last ? "Send onboarding sequence + request a review" : `Auto-advance to “${stages[Math.min(si+1,stages.length-1)]}” on next reply`;
+  const ACT=[["Call",'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/>'],["Text",'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'],["Email",'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'],["Note",'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>']];
+  $("#drawer").innerHTML = `
+    <div class="dw-top">
+      <div class="dw-row1">
+        <span class="dw-ava" style="background:${avaColor(ri)}">${initials}</span>
+        <div><div class="dw-name">${esc(d.n)}</div><div class="dw-svc">${esc(d.s)}</div></div>
+        <button class="dw-x" id="dwX" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="dw-chips">
+        <span class="dw-chip" style="color:${STAGE_BAND[d.st]||'var(--accent)'}">● ${esc(d.st)}</span>
+        <span class="dw-chip">Owner: ${esc(REPS[ri][1])}</span>
+      </div>
+      <div class="dw-val" style="margin-top:10px;">${money(+d.v)}</div>
+    </div>
+    <div class="dw-body">
+      <div class="dw-sec">Details</div>
+      <div class="dw-field"><span>Service</span><b>${esc(d.s)}</b></div>
+      <div class="dw-field"><span>Source</span><b>${source}</b></div>
+      <div class="dw-field"><span>Owner</span><b>${esc(REPS[ri][1])}</b></div>
+      <div class="dw-field"><span>Est. value</span><b>${money(+d.v)}</b></div>
+      <div class="dw-field"><span>Stage</span><b>${esc(d.st)}</b></div>
+      <div class="dw-sec">Activity timeline</div>
+      <div class="dw-tl">
+        ${ev.slice().reverse().map(([t,m,c])=>`<div class="dw-ev"><span class="dw-dot" style="background:${c}"></span><div><div class="dw-et">${esc(t)}</div><div class="dw-em">${m}</div></div></div>`).join("")}
+      </div>
+      <div class="dw-sec">Next step</div>
+      <div class="dw-next"><span style="color:var(--accent);font-weight:800;">➤</span><div class="nt"><b>Automated</b>${esc(next)}</div></div>
+    </div>
+    <div class="dw-actions">
+      ${ACT.map(([l,p])=>`<button class="dw-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>${l}</button>`).join("")}
+    </div>`;
+  $("#drawer").classList.add("on"); $("#drawerScrim").classList.add("on"); $("#drawer").setAttribute("aria-hidden","false");
+  $("#dwX").addEventListener("click",closeDrawer);
+}
+function closeDrawer(){ const d=$("#drawer"); if(!d) return; d.classList.remove("on"); const s=$("#drawerScrim"); if(s) s.classList.remove("on"); d.setAttribute("aria-hidden","true"); }
+$("#drawerScrim").addEventListener("click",closeDrawer);
 
 /* ============ Chrome: theme, mobile, notifications ============ */
 $("#themeBtn").addEventListener("click",()=>{ const c=document.documentElement.dataset.theme==="dark"?"light":"dark"; document.documentElement.dataset.theme=c; try{localStorage.setItem("ghl-theme",c);}catch(e){} });
@@ -727,11 +811,13 @@ const TOUR=[
   {nav:"reputation", sel:".rep-hero", t:"Reviews on autopilot", b:"Every resolved case triggers a review request. More 5-star reviews → more leads and referrals → the loop compounds."},
   {nav:"reporting", sel:".don-wrap", t:"Proof it's working", b:"Lead sources, the lead→signed funnel, and ROAS — so the firm sees exactly what their marketing is doing."}
 ];
+const DRAWER_STEP={nav:"pipeline", sel:"[data-op]", t:"Open any record", b:"Click a card and the full opportunity slides out — contact, source, value, a live activity timeline and the next automated step. Every card in every stage is clickable. Try it right after the tour."};
+const TOURX=(function(){ const a=TOUR.slice(); const i=a.findIndex(s=>s.nav==="pipeline"); if(i>=0) a.splice(i+1,0,DRAWER_STEP); else a.push(DRAWER_STEP); return a; })();
 let ti=-1, tmask=null, tcard=null;
 $("#tourBtn").addEventListener("click",()=>{ ti=0; showTour(); });
 function endTour(){ ti=-1; if(tmask){tmask.remove();tmask=null;} if(tcard){tcard.remove();tcard=null;} }
 function showTour(){
-  const s=TOUR[ti]; if(!s){ endTour(); return; }
+  const s=TOURX[ti]; if(!s){ endTour(); return; }
   if(current!==s.nav) go(s.nav);
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     const el=$(s.sel); if(!el){ endTour(); return; }
@@ -740,14 +826,14 @@ function showTour(){
     if(!tmask){ tmask=document.createElement("div"); tmask.className="tour-mask"; document.body.appendChild(tmask); }
     if(!tcard){ tcard=document.createElement("div"); tcard.className="tour-card"; document.body.appendChild(tcard); }
     tmask.style.left=(r.left-pad)+"px"; tmask.style.top=(r.top-pad)+"px"; tmask.style.width=(r.width+pad*2)+"px"; tmask.style.height=(r.height+pad*2)+"px";
-    tcard.innerHTML=`<div class="tc">Tour · ${ti+1} of ${TOUR.length}</div><h4>${s.t}</h4><p>${s.b}</p><div class="tour-nav"><button class="btn btn-ghost" id="tp" ${ti===0?"disabled":""}>← Back</button><button class="btn btn-primary" id="tn">${ti===TOUR.length-1?"Finish":"Next →"}</button><button class="tour-close" id="tx">Exit</button></div>`;
+    tcard.innerHTML=`<div class="tc">Tour · ${ti+1} of ${TOURX.length}</div><h4>${s.t}</h4><p>${s.b}</p><div class="tour-nav"><button class="btn btn-ghost" id="tp" ${ti===0?"disabled":""}>← Back</button><button class="btn btn-primary" id="tn">${ti===TOURX.length-1?"Finish":"Next →"}</button><button class="tour-close" id="tx">Exit</button></div>`;
     const below=r.bottom+180<window.innerHeight;
     tcard.style.top=below?Math.min(r.bottom+14,window.innerHeight-210)+"px":Math.max(r.top-200,12)+"px";
     tcard.style.left=Math.max(12,Math.min(r.left,window.innerWidth-360))+"px";
     $("#tn").addEventListener("click",()=>{ti++;showTour();}); $("#tp").addEventListener("click",()=>{ti--;showTour();}); $("#tx").addEventListener("click",endTour);
   }));
 }
-document.addEventListener("keydown",e=>{ if(e.key==="Escape") endTour(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ endTour(); closeDrawer(); } });
 
 /* boot */
 renderNav(); go("dashboard");
