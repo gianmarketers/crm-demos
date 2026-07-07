@@ -353,9 +353,12 @@
   .notif-panel{position:fixed; top:60px; right:20px; width:308px; max-width:calc(100vw - 32px); background:var(--surface); border:1px solid var(--hairline); border-radius:12px; box-shadow:var(--shadow-lg); z-index:60; overflow:hidden; padding:6px; animation:fade .15s ease;}
   .notif-panel[hidden]{display:none;}
   .np-h{display:flex; justify-content:space-between; align-items:center; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding:8px 10px 6px;}
-  .np-h span{background:var(--accent); color:#fff; border-radius:99px; padding:1px 7px; font-size:11px;}
+  .np-clear{font-size:11px; font-weight:700; color:var(--accent); text-transform:none; letter-spacing:0; padding:2px 4px; border-radius:6px;}
+  .np-clear:hover{background:var(--accent-soft);}
+  .np-caught{font-size:11px; font-weight:700; color:var(--good); text-transform:none; letter-spacing:0;}
   .np-item{display:flex; gap:10px; align-items:center; width:100%; text-align:left; padding:9px 10px; border-radius:8px;}
   .np-item:hover{background:var(--surface-2);}
+  .np-item.unread::after{content:""; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-left:auto; flex:none;}
   .np-item .feed-ic{width:30px; height:30px; border-radius:8px; flex:none; display:grid; place-items:center;} .np-item .feed-ic svg{width:15px; height:15px;}
   .np-t{font-size:13px; font-weight:600;} .np-m{font-size:11.5px; color:var(--muted);}
   .np-all{width:100%; text-align:center; padding:9px; font-size:12.5px; font-weight:600; color:var(--accent); border-top:1px solid var(--line); margin-top:4px;}
@@ -1190,16 +1193,19 @@ $("#themeBtn").addEventListener("click",()=>{ const c=document.documentElement.d
 $("#menuBtn").addEventListener("click",()=>{ $("#side").classList.add("open"); $("#scrim").classList.add("on"); });
 function closeMobileNav(){ $("#side").classList.remove("open"); $("#scrim").classList.remove("on"); }
 $("#scrim").addEventListener("click",closeMobileNav);
+let notifRead=false;
+function updateBellDot(){ const dot=$("#notifBtn .dot"); if(dot) dot.style.display=notifRead?"none":""; }
 function renderNotifs(){
   const NIC={msg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',star:'<path d="M12 3l2.5 5.2 5.7.8-4.1 4 1 5.7L12 16l-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/>',pay:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>'};
   const NB={msg:'ib',star:'iw',pay:'ig'};
   const items=[{t:"New 5★ review",m:"Google · 2h ago",k:'star',go:'reputation'}];
   CONVOS.filter(c=>c.unread).slice(0,3).forEach(c=>items.push({t:`New message — ${c.n}`, m:`${CH_LABEL[c.ch]} · ${c.time}`, k:'msg', go:'conversations'}));
   items.push({t:"Payment received",m:"1h ago",k:'pay',go:'reporting'});
-  $("#notifPanel").innerHTML = `<div class="np-h">Notifications <span>${items.length}</span></div>`+
-    items.map(n=>`<button class="np-item" data-go="${n.go}"><span class="feed-ic ${NB[n.k]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${NIC[n.k]}</svg></span><div><div class="np-t">${esc(n.t)}</div><div class="np-m">${n.m}</div></div></button>`).join("")+
+  $("#notifPanel").innerHTML = `<div class="np-h">Notifications ${notifRead?'<span class="np-caught">✓ All caught up</span>':'<button class="np-clear" id="npClear">Mark all read</button>'}</div>`+
+    items.map(n=>`<button class="np-item ${notifRead?'':'unread'}" data-go="${n.go}"><span class="feed-ic ${NB[n.k]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${NIC[n.k]}</svg></span><div><div class="np-t">${esc(n.t)}</div><div class="np-m">${n.m}</div></div></button>`).join("")+
     `<button class="np-all" data-go="conversations">View all in Conversations →</button>`;
   $$("#notifPanel [data-go]").forEach(b=>b.addEventListener("click",()=>{ toggleNotif(false); go(b.dataset.go); }));
+  const clr=$("#npClear"); if(clr) clr.addEventListener("click",e=>{ e.stopPropagation(); notifRead=true; updateBellDot(); renderNotifs(); });
 }
 function toggleNotif(force){ const p=$("#notifPanel"); if(!p) return; const open = (force===undefined) ? p.hasAttribute("hidden") : force; if(open){ renderNotifs(); p.removeAttribute("hidden"); } else { p.setAttribute("hidden",""); } }
 $("#notifBtn").addEventListener("click",e=>{ e.stopPropagation(); toggleNotif(); });
