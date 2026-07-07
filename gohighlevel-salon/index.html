@@ -534,6 +534,16 @@ const VIEWS = {};
 
 /* activity-feed rows route by event icon (shared across every niche) */
 const FEED_GO = {ig:"conversations",sms:"conversations",email:"conversations",phone:"conversations",check:"reporting",star:"reputation",cal:"calendar",bolt:"automation"};
+/* dashboard leads-chart ranges (built per-render from the niche's own weekly data) */
+let DASH_DATA=null;
+function renderDashBars(r){
+  const d=(DASH_DATA||{})[r]; if(!d) return;
+  const mx=Math.max(1,...d.data.map(x=>x[1])); const el=$("#dashBars"); if(!el) return;
+  el.innerHTML=d.data.map(([lbl,v])=>`<div class="bar-col"><span class="bar-val">${v}</span><div class="bar" data-h="${Math.round(v/mx*100)}" style="height:0" title="${lbl}: ${v}"></div><span class="bar-lbl">${lbl}</span></div>`).join("");
+  requestAnimationFrame(()=>$$("#dashBars .bar").forEach(b=>b.style.height=b.dataset.h+"%"));
+  const t=$("#dashChartTitle"); if(t) t.textContent="Leads "+d.label;
+  const u=$("#dashChartUnit"); if(u) u.textContent=d.unit;
+}
 
 VIEWS.dashboard = () => {
   const kpis = [
@@ -544,6 +554,12 @@ VIEWS.dashboard = () => {
   ];
   const barData=[["Mon",52],["Tue",64],["Wed",59],["Thu",75],["Fri",89],["Sat",85],["Sun",36]];
   const maxB=Math.max(...barData.map(b=>b[1]));
+  const weekTot=barData.reduce((a,b)=>a+b[1],0);
+  DASH_DATA={
+    week:{data:barData, unit:"by day", label:"this week"},
+    month:{data:[["W1",Math.round(weekTot*.85)],["W2",Math.round(weekTot*.95)],["W3",Math.round(weekTot*.9)],["W4",Math.round(weekTot*1.05)]], unit:"by week", label:"this month"},
+    quarter:{data:[["Apr",Math.round(weekTot*4*.78)],["May",Math.round(weekTot*4*.9)],["Jun",Math.round(weekTot*4)]], unit:"by month", label:"this quarter"}
+  };
   const feed=[
     ["ig",'phone',"Missed-call recovered — <b>Nick Perez</b>","Fade + beard Thu 6pm · 2m ago"],
     ["good",'check',"<b>Nia Kane</b> renewed her membership","Monthly blowout · 1h ago"],
@@ -567,7 +583,7 @@ VIEWS.dashboard = () => {
   </div>`; })()}
   <div class="grid2">
     <div class="card">
-      <div class="card-h"><h3>Leads this week</h3><span class="sub">by day</span><span class="link">This month ▾</span></div>
+      <div class="card-h"><h3 id="dashChartTitle">Leads this week</h3><span class="sub" id="dashChartUnit">by day</span><div class="cal-seg-wrap" id="dashRange"><button class="cal-seg on" data-r="week">Week</button><button class="cal-seg" data-r="month">Month</button><button class="cal-seg" data-r="quarter">Quarter</button></div></div>
       <div class="card-pad">
         <div class="legend"><span><i style="background:var(--accent)"></i>Leads</span></div>
         <div class="bars" id="dashBars">
@@ -952,7 +968,7 @@ VIEWS.reporting = () => {
 
 /* ============ AFTER-render hooks ============ */
 const AFTER = {
-  dashboard(){ requestAnimationFrame(()=>$$("#dashBars .bar").forEach(b=>b.style.height=b.dataset.h+"%")); $$(".feed-row[data-fgo]").forEach(el=>el.addEventListener("click",()=>go(el.dataset.fgo))); },
+  dashboard(){ requestAnimationFrame(()=>$$("#dashBars .bar").forEach(b=>b.style.height=b.dataset.h+"%")); $$(".feed-row[data-fgo]").forEach(el=>el.addEventListener("click",()=>go(el.dataset.fgo))); $$("#dashRange .cal-seg").forEach(btn=>btn.addEventListener("click",()=>{ $$("#dashRange .cal-seg").forEach(x=>x.classList.remove("on")); btn.classList.add("on"); renderDashBars(btn.dataset.r); })); },
   conversations(){ $$("#convList .conv-item").forEach(el=>el.addEventListener("click",()=>renderThread(+el.dataset.c))); $$("#convFilter .cf-chip").forEach(ch=>ch.addEventListener("click",()=>{ $$("#convFilter .cf-chip").forEach(x=>x.classList.remove("on")); ch.classList.add("on"); const f=ch.dataset.f; $$("#convList .conv-item").forEach(el=>{ const show=f==="all"||(f==="unread"?el.dataset.unread==="1":el.dataset.ch===f); el.style.display=show?"":"none"; }); })); renderThread(0); },
   automation(){ $$("#wfTabs .wf-tab").forEach(t=>t.addEventListener("click",()=>renderWF(+t.dataset.wf))); const tog=$("#wfActive"); if(tog) tog.addEventListener("change",()=>{ WF_STATE[curWF]=tog.checked; renderWF(curWF); }); renderWF(0); },
   pipeline(){ $$("[data-op]").forEach(el=>{ const open=()=>openOpp(el.dataset); el.addEventListener("click",open); el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); open(); } }); }); const ab=$("#addOppBtn"); if(ab) ab.addEventListener("click",openNewOpp); },
